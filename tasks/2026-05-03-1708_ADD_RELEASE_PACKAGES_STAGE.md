@@ -1,0 +1,111 @@
+# Add Release Packages Stage
+
+## Goal
+
+Add a package release/versioning stage to Rush Delivery so the framework can
+own the complete CI flow for Rush monorepos: detect, validate, build, package,
+release packages, and deploy.
+
+The public entrypoint will be named `releasePackages`. Release metadata will
+live under `.dagger/release`, starting with `.dagger/release/npm.yaml`. The
+metadata can include a `publish` section for the final registry upload step.
+
+## Direction
+
+- Keep deploy targets separate from package release metadata.
+- Let Rush remain the source of truth for package selection, versioning, change
+  files, and publishable package rules.
+- Add package release validation to PR validation when release metadata enables
+  it.
+- Add `releasePackages` before composing package release behavior into the
+  existing `workflow` entrypoint.
+- Keep provider-off local dry-runs useful.
+- Keep live package publishing unavailable from PR validation by default.
+
+## Proposed Metadata Shape
+
+Initial metadata target:
+
+```text
+.dagger/release/npm.yaml
+```
+
+Draft conceptual shape:
+
+```yaml
+kind: npm
+
+versioning:
+  strategy: rush-change-files
+
+auth:
+  kind: trusted_publishing
+  # or:
+  # kind: token
+  # token_env: NPM_TOKEN
+
+publish:
+  registry: https://registry.npmjs.org/
+  tag: latest
+  access: public
+  provenance: true
+```
+
+The release stage should use the framework-controlled Rush workflow container by
+default. That container already owns the standard Node image, Git tooling,
+repository workspace, Rush install, toolchain image provider, and Rush cache
+provider behavior. Release metadata should only describe release-specific
+policy, authentication, and publish settings unless a future provider proves it
+needs an explicit executor override.
+
+The final schema should stay small when Rush can own behavior through existing
+Rush config, such as `common/config/rush/.npmrc-publish`,
+`version-policies.json`, change files, and package-level `shouldPublish`.
+
+## Open Design Questions
+
+- Should the first implementation support only Rush change-file publishing, or
+  should it support Rush version policies in the same release?
+- Should `releasePackages` create and push version commits/tags, or should it
+  initially publish versions already committed by the repository?
+- If package release is later composed into `workflow`, should deploy tags point
+  at the original workflow SHA or at a generated version commit SHA?
+- Should npm trusted publishing/OIDC be implemented first, or should token
+  auth land first with OIDC planned as a follow-up?
+- Should token auth always map the configured token env into the npm/Rush env
+  internally, or should metadata expose the exact publish env variable name
+  expected by `.npmrc-publish`?
+- Should the action wrapper expose package release env through the existing
+  `deploy-env` input for compatibility, or introduce a broader workflow env
+  name while keeping `deploy-env` as an alias?
+
+## Checklist
+
+- [ ] Freeze current docs for the latest released version before editing root
+      docs for this release line.
+- [ ] Finalize the release metadata contract and exact JSON schema shape.
+- [ ] Add release metadata parser, model types, and schema validation.
+- [ ] Extend metadata contract validation for `.dagger/release/npm.yaml`.
+- [ ] Add PR validation behavior for release readiness, such as Rush change
+      file verification when configured.
+- [ ] Add the public `releasePackages` Dagger entrypoint.
+- [ ] Implement dry-run behavior that prints planned versioning/publish actions
+      without pushing commits, tags, or packages.
+- [ ] Implement live npm publish flow with explicit auth handling and scoped
+      runtime environment.
+- [ ] Add GitHub Action wrapper support for `entrypoint: releasePackages`.
+- [ ] Add tests for parser/schema validation, action argument generation,
+      dry-run behavior, auth validation, and PR safety behavior.
+- [ ] Update current schemas and create a new versioned schema directory for
+      the release.
+- [ ] Update README, API docs, metadata docs, workflow docs, GitHub Action docs,
+      tutorial docs, and website examples.
+- [ ] Run relevant verification.
+
+## Verification
+
+- `npm test`
+- `npm run typecheck`
+- `npm run site:docusaurus:check`
+- `npm run site:check`
+- `git diff --check`
