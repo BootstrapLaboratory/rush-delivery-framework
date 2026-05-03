@@ -19,6 +19,12 @@ metadata can include a `publish` section for the final registry upload step.
   it.
 - Add `releasePackages` before composing package release behavior into the
   existing `workflow` entrypoint.
+- Start with a separate package release flow, then later compose it carefully
+  into `workflow` after the release behavior is proven.
+- In the future composed workflow, deploy targets and release targets should
+  share source acquisition, metadata validation, detection, Rush install, and
+  build preparation where possible, then execute package release and deploy as
+  separate branches when their dependencies allow it.
 - Keep provider-off local dry-runs useful.
 - Keep live package publishing unavailable from PR validation by default.
 
@@ -37,12 +43,11 @@ kind: npm
 
 versioning:
   strategy: rush-change-files
+  target_branch: main
 
 auth:
-  kind: trusted_publishing
-  # or:
-  # kind: token
-  # token_env: NPM_TOKEN
+  kind: token
+  token_env: NPM_TOKEN
 
 publish:
   registry: https://registry.npmjs.org/
@@ -62,16 +67,26 @@ The final schema should stay small when Rush can own behavior through existing
 Rush config, such as `common/config/rush/.npmrc-publish`,
 `version-policies.json`, change files, and package-level `shouldPublish`.
 
+## Initial Implementation Decisions
+
+- Support Rush change-file publishing first.
+- Add Rush version policies as a later release strategy.
+- Use token auth first with an env variable consumed by Rush/npm through
+  project `.npmrc-publish` conventions.
+- Treat npm trusted publishing/OIDC as a follow-up after the token flow is
+  stable inside Dagger.
+- Add `releaseEnvFile` to the new Dagger entrypoint instead of reusing
+  `deployEnvFile`.
+- Run the standard Rush install and lifecycle before live publishing so package
+  release does not publish stale outputs.
+- Keep `releasePackages` separate from `workflow` in the first implementation.
+
 ## Open Design Questions
 
-- Should the first implementation support only Rush change-file publishing, or
-  should it support Rush version policies in the same release?
 - Should `releasePackages` create and push version commits/tags, or should it
   initially publish versions already committed by the repository?
 - If package release is later composed into `workflow`, should deploy tags point
   at the original workflow SHA or at a generated version commit SHA?
-- Should npm trusted publishing/OIDC be implemented first, or should token
-  auth land first with OIDC planned as a follow-up?
 - Should token auth always map the configured token env into the npm/Rush env
   internally, or should metadata expose the exact publish env variable name
   expected by `.npmrc-publish`?
