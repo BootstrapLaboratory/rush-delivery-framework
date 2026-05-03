@@ -65,6 +65,8 @@ test("action metadata defines a composite action over dagger-for-github", () => 
 
   assert.equal(metadata.inputs.entrypoint.default, "workflow");
   assert.equal(metadata.inputs.repo.default, "");
+  assert.equal(metadata.inputs["release-env"].default, "");
+  assert.equal(metadata.inputs["release-env-file"].default, "");
   assert.equal(metadata.inputs["validate-targets-json"].default, "[]");
   assert.equal(metadata.runs.using, "composite");
   assert.ok(
@@ -147,6 +149,9 @@ test("prepare workflow writes deploy env, runtime files, and Dagger args", async
   assert.match(deployEnv, /GITHUB_API_URL=https:\/\/api\.github\.example/);
   assert.match(deployEnv, /GITHUB_TOKEN=token-value/);
 
+  const releaseEnv = await readFile(outputs["release-env-file"], "utf8");
+  assert.match(releaseEnv, /GITHUB_TOKEN=token-value/);
+
   assert.equal(
     await readFile(
       path.join(outputs["runtime-files"], "gcp-credentials.json"),
@@ -158,6 +163,68 @@ test("prepare workflow writes deploy env, runtime files, and Dagger args", async
   await assert.rejects(
     stat(path.join(outputs["runtime-files"], "ignored.json")),
   );
+
+  await rm(tempDir, { force: true, recursive: true });
+});
+
+test("prepare release-packages entrypoint writes release env and Dagger args", async () => {
+  const tempDir = mkdtempSync(path.join(tmpdir(), "rush-delivery-action-"));
+  const outputPath = path.join(tempDir, "github-output");
+  const releaseEnvFile = path.join(tempDir, "release.env");
+
+  writeFileSync(releaseEnvFile, "NPM_TOKEN=from-file\n");
+
+  const result = runPrepare({
+    GITHUB_ACTION_PATH: repoRoot,
+    GITHUB_ACTOR: "octocat",
+    GITHUB_OUTPUT: outputPath,
+    GITHUB_REF: "refs/heads/main",
+    GITHUB_REPOSITORY: "owner/repo",
+    GITHUB_SERVER_URL: "https://github.example",
+    GITHUB_SHA: "1234567890abcdef1234567890abcdef12345678",
+    GITHUB_WORKSPACE: "/home/runner/work/repo/repo",
+    INPUT_DRY_RUN: "false",
+    INPUT_ENTRYPOINT: "release-packages",
+    INPUT_INCLUDE_GITHUB_ENV: "true",
+    INPUT_RELEASE_ENV: "EXTRA_RELEASE_VALUE=yes",
+    INPUT_RELEASE_ENV_FILE: releaseEnvFile,
+    INPUT_RUSH_CACHE_PROVIDER: "github",
+    INPUT_SOURCE_AUTH_TOKEN_ENV: "GITHUB_TOKEN",
+    INPUT_SOURCE_MODE: "git",
+    INPUT_TOOLCHAIN_IMAGE_PROVIDER: "github",
+    RD_GITHUB_API_URL: "https://api.github.example",
+    RD_GITHUB_TOKEN: "token-value",
+    RUNNER_TEMP: tempDir,
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const outputs = parseGithubOutput(await readFile(outputPath, "utf8"));
+  assert.match(outputs.args, /^release-packages /);
+  assert.match(
+    outputs.args,
+    /--git-sha=1234567890abcdef1234567890abcdef12345678/,
+  );
+  assert.match(outputs.args, /--dry-run=false/);
+  assert.match(outputs.args, /--release-env-file=/);
+  assert.match(outputs.args, /--toolchain-image-provider=github/);
+  assert.match(outputs.args, /--toolchain-image-policy=lazy/);
+  assert.match(outputs.args, /--rush-cache-provider=github/);
+  assert.match(outputs.args, /--rush-cache-policy=lazy/);
+  assert.match(outputs.args, /--source-mode=git/);
+  assert.match(
+    outputs.args,
+    /--source-repository-url=https:\/\/github\.example\/owner\/repo\.git/,
+  );
+  assert.match(outputs.args, /--source-ref=refs\/heads\/main/);
+  assert.match(outputs.args, /--source-auth-token-env=GITHUB_TOKEN/);
+  assert.doesNotMatch(outputs.args, /--deploy-env-file=/);
+  assert.doesNotMatch(outputs.args, /--runtime-files=/);
+
+  const releaseEnv = await readFile(outputs["release-env-file"], "utf8");
+  assert.match(releaseEnv, /NPM_TOKEN=from-file/);
+  assert.match(releaseEnv, /EXTRA_RELEASE_VALUE=yes/);
+  assert.match(releaseEnv, /GITHUB_TOKEN=token-value/);
 
   await rm(tempDir, { force: true, recursive: true });
 });

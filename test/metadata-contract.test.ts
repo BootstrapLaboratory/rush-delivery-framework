@@ -160,6 +160,21 @@ function validMetadataFiles(): Record<string, string> {
       "    args: [--version]",
       "",
     ].join("\n"),
+    ".dagger/release/npm.yaml": [
+      "kind: npm",
+      "versioning:",
+      "  strategy: rush-change-files",
+      "  target_branch: main",
+      "auth:",
+      "  kind: token",
+      "  token_env: NPM_TOKEN",
+      "publish:",
+      "  registry: https://registry.npmjs.org/",
+      "  tag: latest",
+      "  access: public",
+      "  provenance: true",
+      "",
+    ].join("\n"),
     ".dagger/rush-cache/providers.yaml": [
       "cache:",
       "  version: v1",
@@ -174,6 +189,8 @@ function validMetadataFiles(): Record<string, string> {
       "    username_env: GITHUB_ACTOR",
       "",
     ].join("\n"),
+    "common/config/rush/.npmrc-publish":
+      "//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n",
     "common/config/rush/pnpm-lock.yaml": "lockfileVersion: '9.0'\n",
     "apps/server/package.json": "{}",
     "apps/webapp/package.json": "{}",
@@ -195,6 +212,7 @@ test("validates the fixture repository metadata contract", async () => {
 
   assert.deepEqual(result.deploy_targets, ["server", "webapp"]);
   assert.deepEqual(result.package_targets, ["server", "webapp"]);
+  assert.deepEqual(result.release_targets, ["npm"]);
   assert.deepEqual(result.validation_targets, ["server"]);
   assert.ok(result.rush_projects.includes("server"));
   assert.ok(result.rush_projects.includes("webapp"));
@@ -207,6 +225,7 @@ test("accepts a complete framework metadata contract", async () => {
 
   assert.deepEqual(result.deploy_targets, ["server", "webapp"]);
   assert.deepEqual(result.package_targets, ["server", "webapp"]);
+  assert.deepEqual(result.release_targets, ["npm"]);
   assert.deepEqual(result.validation_targets, ["server"]);
 });
 
@@ -266,6 +285,7 @@ test("accepts adding a deploy target through metadata only", async () => {
   );
   assert.deepEqual(result.deploy_targets, ["server", "webapp", "worker"]);
   assert.deepEqual(result.package_targets, ["server", "webapp", "worker"]);
+  assert.deepEqual(result.release_targets, ["npm"]);
   assert.deepEqual(result.validation_targets, ["server", "worker"]);
   assert.deepEqual(result.rush_projects, ["server", "webapp", "worker"]);
 
@@ -334,6 +354,45 @@ test("reports cross-file metadata contract issues together", async () => {
       assert.match(
         error.message,
         /Rush cache provider metadata file ".+providers\.yaml" is invalid: Rush cache providers file has unsupported field: unexpected\./,
+      );
+      return true;
+    },
+  );
+});
+
+test("reports invalid NPM release metadata", async () => {
+  const files = validMetadataFiles();
+
+  files[".dagger/release/npm.yaml"] += "unexpected: true\n";
+  delete files["common/config/rush/.npmrc-publish"];
+
+  await assert.rejects(
+    () =>
+      validateMetadataContractRepository(new MemoryMetadataRepository(files)),
+    (error) => {
+      assert.ok(error instanceof Error);
+      assert.match(
+        error.message,
+        /NPM release metadata file ".+npm\.yaml" is invalid: NPM release file has unsupported field: unexpected\./,
+      );
+      return true;
+    },
+  );
+});
+
+test("requires .npmrc-publish for NPM token release metadata", async () => {
+  const files = validMetadataFiles();
+
+  delete files["common/config/rush/.npmrc-publish"];
+
+  await assert.rejects(
+    () =>
+      validateMetadataContractRepository(new MemoryMetadataRepository(files)),
+    (error) => {
+      assert.ok(error instanceof Error);
+      assert.match(
+        error.message,
+        /NPM release token auth \.npmrc-publish file "common\/config\/rush\/\.npmrc-publish" must exist\./,
       );
       return true;
     },

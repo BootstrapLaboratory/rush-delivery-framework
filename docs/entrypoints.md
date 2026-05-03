@@ -59,6 +59,31 @@ Returns a validation summary.
 For local runs against a checked-out working tree, use `--repo=.` with
 `--source-mode=local_copy`.
 
+## `release-packages`
+
+Runs package release/versioning from `.dagger/release/npm.yaml`. The initial
+strategy is npm publishing through Rush change files.
+
+Use it for standalone package release workflows. The entrypoint runs the
+standard Rush lifecycle, lets Rush apply change files, publishes packages, and
+pushes the generated version commit. It does not touch deploy tags.
+
+```sh
+dagger -m "$RUSH_DELIVERY_MODULE" call release-packages \
+  --git-sha="$GIT_SHA" \
+  --dry-run=false \
+  --release-env-file="$RELEASE_ENV_FILE" \
+  --toolchain-image-provider=github \
+  --rush-cache-provider=github \
+  --source-mode=git \
+  --source-repository-url="$SOURCE_REPOSITORY_URL" \
+  --source-ref="$SOURCE_REF" \
+  --source-auth-token-env=GITHUB_TOKEN
+```
+
+For local dry-runs against a checked-out working tree, use `--repo=.` with
+`--source-mode=local_copy` and keep `--dry-run=true`.
+
 ## `detect`
 
 Computes the canonical CI plan JSON. The plan includes mode, validation targets,

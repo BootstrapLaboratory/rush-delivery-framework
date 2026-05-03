@@ -37,8 +37,9 @@ typecheck and unit tests from this repository.
 dagger call self-check
 ```
 
-`validate` runs pull-request validation for affected Rush projects and any
-target-specific validation metadata.
+`validate` runs pull-request validation for affected Rush projects,
+target-specific validation metadata, and release-readiness checks when
+`.dagger/release/npm.yaml` is configured.
 
 ```sh
 dagger -m "$RUSH_DELIVERY_MODULE" call validate \
@@ -57,6 +58,29 @@ dagger -m "$RUSH_DELIVERY_MODULE" call validate \
 For local validation against unpushed changes, use `--repo=.` with
 `--source-mode=local_copy`.
 
+`releasePackages` runs the package release/versioning flow from
+`.dagger/release/npm.yaml`. The first supported strategy is Rush change-file
+publishing for npm packages.
+
+```sh
+dagger -m "$RUSH_DELIVERY_MODULE" call release-packages \
+  --git-sha="$GIT_SHA" \
+  --dry-run=false \
+  --release-env-file="$RELEASE_ENV_FILE" \
+  --toolchain-image-provider=github \
+  --rush-cache-provider=github \
+  --source-mode=git \
+  --source-repository-url="$SOURCE_REPOSITORY_URL" \
+  --source-ref="$SOURCE_REF" \
+  --source-auth-token-env=GITHUB_TOKEN
+```
+
+Live package releases require Git source mode with write credentials. Rush
+Delivery runs the standard Rush lifecycle, lets Rush apply the change files,
+publishes packages, and pushes the version commit back to the configured target
+branch. Dry-runs run the same planning path without pushing commits, tags, or
+packages.
+
 See [Entrypoints reference](entrypoints.md) for every callable function,
 including separate `detect`, `build`, `package`, `deploy`, metadata validation,
 and diagnostic entrypoints.
@@ -72,9 +96,13 @@ source mode.
 `eventName`, `forceTargetsJson`, `prBaseSha`, and `deployTagPrefix` shape
 detection. Forced targets are used by manual deploy wrappers.
 
-`deployEnvFile` is a newline-delimited environment file. The framework reads it
-once, then passes only package- or deploy-target-allowed variables to build and
-runtime containers.
+`deployEnvFile` is a newline-delimited environment file for workflow, validate,
+build, and deploy paths. The framework reads it once, then passes only package-
+or deploy-target-allowed variables to build and runtime containers.
+
+`releaseEnvFile` is a newline-delimited environment file for
+`releasePackages`. It carries package release credentials such as `NPM_TOKEN`
+and source write credentials such as `GITHUB_TOKEN`.
 
 `runtimeFiles` is an optional directory of deploy-only files such as cloud
 credentials, kubeconfig files, or signing material. Deploy target metadata can

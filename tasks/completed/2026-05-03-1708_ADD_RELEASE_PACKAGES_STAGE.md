@@ -98,26 +98,26 @@ Rush config, such as `common/config/rush/.npmrc-publish`,
 
 ## Checklist
 
-- [ ] Freeze current docs for the latest released version before editing root
+- [x] Freeze current docs for the latest released version before editing root
       docs for this release line.
-- [ ] Finalize the release metadata contract and exact JSON schema shape.
-- [ ] Add release metadata parser, model types, and schema validation.
-- [ ] Extend metadata contract validation for `.dagger/release/npm.yaml`.
-- [ ] Add PR validation behavior for release readiness, such as Rush change
+- [x] Finalize the release metadata contract and exact JSON schema shape.
+- [x] Add release metadata parser, model types, and schema validation.
+- [x] Extend metadata contract validation for `.dagger/release/npm.yaml`.
+- [x] Add PR validation behavior for release readiness, such as Rush change
       file verification when configured.
-- [ ] Add the public `releasePackages` Dagger entrypoint.
-- [ ] Implement dry-run behavior that prints planned versioning/publish actions
+- [x] Add the public `releasePackages` Dagger entrypoint.
+- [x] Implement dry-run behavior that prints planned versioning/publish actions
       without pushing commits, tags, or packages.
-- [ ] Implement live npm publish flow with explicit auth handling and scoped
+- [x] Implement live npm publish flow with explicit auth handling and scoped
       runtime environment.
-- [ ] Add GitHub Action wrapper support for `entrypoint: releasePackages`.
-- [ ] Add tests for parser/schema validation, action argument generation,
+- [x] Add GitHub Action wrapper support for `entrypoint: releasePackages`.
+- [x] Add tests for parser/schema validation, action argument generation,
       dry-run behavior, auth validation, and PR safety behavior.
-- [ ] Update current schemas and create a new versioned schema directory for
+- [x] Update current schemas and create a new versioned schema directory for
       the release.
-- [ ] Update README, API docs, metadata docs, workflow docs, GitHub Action docs,
+- [x] Update README, API docs, metadata docs, workflow docs, GitHub Action docs,
       tutorial docs, and website examples.
-- [ ] Run relevant verification.
+- [x] Run relevant verification.
 
 ## Verification
 

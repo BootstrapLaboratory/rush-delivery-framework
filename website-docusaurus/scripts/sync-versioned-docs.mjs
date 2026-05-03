@@ -14,6 +14,7 @@ const githubBlobBase =
   "https://github.com/BootstrapLaboratory/rush-delivery/blob";
 
 const publishedVersions = [
+  "v0.5.0",
   "v0.4.1",
   "v0.4.0",
   "v0.3.4",
@@ -116,7 +117,7 @@ function frontmatterString(page) {
     lines.push(`description: ${JSON.stringify(page.description)}`);
   }
 
-  lines.push("---", "");
+  lines.push("---", "", "");
   return lines.join("\n");
 }
 

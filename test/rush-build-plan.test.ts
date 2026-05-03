@@ -7,6 +7,7 @@ import {
   buildRushValidationSteps,
 } from "../src/stages/build-stage/rush-build-plan.ts";
 import type { CiPlan } from "../src/model/ci-plan.ts";
+import { buildRushAllProjectsLifecycleSteps } from "../src/rush/rush-command-plan.ts";
 
 const ciPlan = {
   affected_projects_by_deploy_target: {
@@ -145,6 +146,27 @@ test("keeps empty validate targets as a no-op", () => {
     }),
     [],
   );
+});
+
+test("builds Rush lifecycle steps for every project without target args", () => {
+  assert.deepStrictEqual(buildRushAllProjectsLifecycleSteps(), [
+    {
+      args: ["common/scripts/install-run-rush.js", "verify"],
+      command: "node",
+    },
+    {
+      args: ["common/scripts/install-run-rush.js", "lint"],
+      command: "node",
+    },
+    {
+      args: ["common/scripts/install-run-rush.js", "test"],
+      command: "node",
+    },
+    {
+      args: ["common/scripts/install-run-rush.js", "build"],
+      command: "node",
+    },
+  ]);
 });
 
 test("keeps validation planning separate from deploy targets", () => {

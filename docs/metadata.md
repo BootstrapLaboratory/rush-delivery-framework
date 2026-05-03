@@ -10,12 +10,57 @@ For editor integration in external projects, prefer exact versioned schema
 URLs. For example:
 
 ```yaml
-# yaml-language-server: $schema=https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.5.0/deploy-target.schema.json
+# yaml-language-server: $schema=https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.0/deploy-target.schema.json
 ```
 
 The root `https://bootstraplaboratory.github.io/rush-delivery/schemas/` URLs
-track the current release. Exact paths such as `/schemas/v0.5.0/...` are the
+track the current release. Exact paths such as `/schemas/v0.6.0/...` are the
 stable contract for projects pinned to that Rush Delivery version.
+
+## Package Release
+
+Package release metadata lives in `.dagger/release/npm.yaml`. It is separate
+from deploy target metadata because npm package releases are registry side
+effects, not deploy mesh targets.
+
+The first supported release strategy uses Rush change files. Rush remains the
+source of truth for package selection, version changes, changelogs, and
+publishable package rules.
+
+```yaml
+# yaml-language-server: $schema=https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.0/npm-release.schema.json
+
+kind: npm
+
+versioning:
+  strategy: rush-change-files
+  target_branch: main
+
+auth:
+  kind: token
+  token_env: NPM_TOKEN
+
+publish:
+  registry: https://registry.npmjs.org/
+  tag: latest
+  access: public
+  provenance: true
+```
+
+For token auth, keep the npm token in the release env file and reference it
+from `common/config/rush/.npmrc-publish`, for example:
+
+```text
+//registry.npmjs.org/:_authToken=${NPM_TOKEN}
+```
+
+Pull-request validation runs Rush change-file verification when npm release
+metadata is present. Live `releasePackages` runs the standard Rush lifecycle,
+lets Rush apply the change files, publishes packages, and pushes the generated
+version commit back to `versioning.target_branch`.
+
+Schema:
+[`../schemas/npm-release.schema.json`](../schemas/npm-release.schema.json)
 
 ## Deploy Services Mesh
 

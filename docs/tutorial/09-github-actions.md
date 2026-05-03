@@ -14,7 +14,7 @@ permissions:
   packages: read
 
 steps:
-  - uses: BootstrapLaboratory/rush-delivery@v0.5.0
+  - uses: BootstrapLaboratory/rush-delivery@v0.6.0
     with:
       entrypoint: validate
       toolchain-image-provider: github
@@ -31,6 +31,9 @@ which never publishes provider artifacts.
 If a package target needs build-time env, pass the source values through
 `deploy-env` in PR validation too. The metadata allowlist still decides which
 values reach the build container.
+
+If `.dagger/release/npm.yaml` exists, PR validation also verifies Rush change
+files before the PR reaches `main`.
 
 ## Main Release Workflow
 
@@ -78,12 +81,36 @@ with:
 This keeps the deployment path identical. Manual deploys still use the same
 metadata, provider settings, runtime files, package logic, and deploy mesh.
 
+## Package Release Workflow
+
+Package release/versioning should start as a separate workflow. It uses its own
+release env and does not touch deploy tags:
+
+```yaml
+permissions:
+  contents: write
+  packages: write
+
+steps:
+  - uses: BootstrapLaboratory/rush-delivery@v0.6.0
+    with:
+      entrypoint: release-packages
+      dry-run: "false"
+      toolchain-image-provider: github
+      rush-cache-provider: github
+      release-env: |
+        NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+```
+
+Rush Delivery appends `GITHUB_TOKEN` by default, so the release entrypoint can
+push the Rush-generated version commit back to the target branch.
+
 ## Version Pinning
 
 Pin Rush Delivery to a released tag:
 
 ```yaml
-uses: BootstrapLaboratory/rush-delivery@v0.5.0
+uses: BootstrapLaboratory/rush-delivery@v0.6.0
 ```
 
 Advance the tag intentionally when you want new behavior. Do not use an
@@ -94,6 +121,7 @@ unversioned branch in production CI.
 - PR workflow uses `contents: read` and `packages: read`.
 - PR workflow uses validate defaults or explicit `pull-or-build` policies.
 - Release workflow uses `packages: write`.
+- Package release workflow uses `contents: write`.
 - Runtime files carry credential files.
 - Deploy env carries settings and secrets.
 - Manual force deploy workflows reuse the main workflow.

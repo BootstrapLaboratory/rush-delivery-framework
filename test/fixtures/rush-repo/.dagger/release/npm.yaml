@@ -1,0 +1,15 @@
+kind: npm
+
+versioning:
+  strategy: rush-change-files
+  target_branch: main
+
+auth:
+  kind: token
+  token_env: NPM_TOKEN
+
+publish:
+  registry: https://registry.npmjs.org/
+  tag: latest
+  access: public
+  provenance: true

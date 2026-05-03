@@ -9,7 +9,7 @@ need to mount the repository into the module.
 For pull-request validation:
 
 ```sh
-RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.5.0
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.0
 DEPLOY_ENV_FILE="${RUNNER_TEMP}/dagger-validate.env"
 SOURCE_REPOSITORY_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
 
@@ -39,10 +39,13 @@ never publishes from the PR run.
 When package target build metadata uses `pass_env` or `map_env`, write those
 source variables into `DEPLOY_ENV_FILE` before calling `validate`.
 
+If `.dagger/release/npm.yaml` exists, validation also verifies Rush change
+files.
+
 For release workflow runs:
 
 ```sh
-RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.5.0
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.0
 RUNTIME_FILES_DIR="${RUNNER_TEMP}/rush-delivery-runtime-files"
 DEPLOY_ENV_FILE="${RUNNER_TEMP}/dagger-deploy.env"
 SOURCE_REPOSITORY_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
@@ -76,6 +79,30 @@ dagger -m "${RUSH_DELIVERY_MODULE}" call workflow \
   --source-auth-token-env=GITHUB_TOKEN \
   --runtime-files="${RUNTIME_FILES_DIR}" \
   --docker-socket=/var/run/docker.sock
+```
+
+For package release/versioning:
+
+```sh
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.0
+RELEASE_ENV_FILE="${RUNNER_TEMP}/dagger-release.env"
+SOURCE_REPOSITORY_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+
+cat > "${RELEASE_ENV_FILE}" <<EOF
+GITHUB_TOKEN=${GITHUB_TOKEN}
+NPM_TOKEN=${NPM_TOKEN}
+EOF
+
+dagger -m "${RUSH_DELIVERY_MODULE}" call release-packages \
+  --git-sha="${GITHUB_SHA}" \
+  --dry-run=false \
+  --release-env-file="${RELEASE_ENV_FILE}" \
+  --toolchain-image-provider=github \
+  --rush-cache-provider=github \
+  --source-mode=git \
+  --source-repository-url="${SOURCE_REPOSITORY_URL}" \
+  --source-ref="${GITHUB_REF}" \
+  --source-auth-token-env=GITHUB_TOKEN
 ```
 
 Use [Local Runs](local-run.md) when you need to test changes that have not been

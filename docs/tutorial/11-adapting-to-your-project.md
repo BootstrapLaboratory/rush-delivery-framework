@@ -115,4 +115,4 @@ references when you need exact schema details.
 
 For editor validation, point metadata files at exact published schema versions
 such as
-`https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.5.0/deploy-target.schema.json`.
+`https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.0/deploy-target.schema.json`.

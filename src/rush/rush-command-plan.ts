@@ -57,3 +57,10 @@ export function buildRushLifecycleSteps(
     command: "node",
   }));
 }
+
+export function buildRushAllProjectsLifecycleSteps(): RushCommandStep[] {
+  return RUSH_LIFECYCLE_COMMANDS.map((rushCommand) => ({
+    args: [RUSH_SCRIPT, rushCommand],
+    command: "node",
+  }));
+}

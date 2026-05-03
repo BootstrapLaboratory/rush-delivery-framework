@@ -39,7 +39,7 @@ For GitHub Actions, prefer the repository action wrapper:
 
 ```yaml
 - name: Rush Delivery
-  uses: BootstrapLaboratory/rush-delivery@v0.5.0
+  uses: BootstrapLaboratory/rush-delivery@v0.6.0
   with:
     force-targets-json: ${{ inputs.force_targets_json || '[]' }}
     environment: prod
@@ -54,16 +54,38 @@ See [GitHub Action usage](github-actions.md) for the complete production shape.
 
 For pull-request validation, use the same action with the `validate`
 entrypoint. The action defaults provider policies to `pull-or-build` for
-validation:
+validation. If npm release metadata is configured, validation also verifies Rush
+change files:
 
 ```yaml
 - name: Rush Delivery validation
-  uses: BootstrapLaboratory/rush-delivery@v0.5.0
+  uses: BootstrapLaboratory/rush-delivery@v0.6.0
   with:
     entrypoint: validate
     toolchain-image-provider: github
     rush-cache-provider: github
 ```
+
+For npm package release, use the standalone `release-packages` entrypoint while
+the release flow is kept separate from deploy workflow composition:
+
+```yaml
+- name: Rush Delivery package release
+  uses: BootstrapLaboratory/rush-delivery@v0.6.0
+  with:
+    entrypoint: release-packages
+    dry-run: "false"
+    toolchain-image-provider: github
+    rush-cache-provider: github
+    release-env: |
+      NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+```
+
+The action appends `GITHUB_TOKEN` to the release env file by default, so live
+package release can push the Rush-generated version commit back to the target
+branch. The workflow job needs `contents: write`; it needs `packages: read` or
+`packages: write` only when using provider-backed Rush cache or toolchain
+images.
 
 For a raw Dagger command this means:
 

@@ -33,7 +33,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.5.0
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.0
         with:
           entrypoint: validate
           toolchain-image-provider: github
@@ -42,6 +42,10 @@ jobs:
 
 If package target build metadata allows env through `pass_env` or `map_env`,
 add those source values to `deploy-env` in the validation step as well.
+
+If `.dagger/release/npm.yaml` exists, the same validation step also verifies
+Rush change files so package releases cannot reach `main` without versioning
+metadata.
 
 ## Release Workflow
 
@@ -65,7 +69,7 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - name: Rush Delivery
-        uses: BootstrapLaboratory/rush-delivery@v0.5.0
+        uses: BootstrapLaboratory/rush-delivery@v0.6.0
         with:
           dry-run: "false"
           force-targets-json: ${{ inputs.force_targets_json || '[]' }}
@@ -88,5 +92,26 @@ jobs:
 
 Next, see [CI Using Command Line](ci-cli.md) if you want to call the module
 directly from a custom CI script.
+
+## Package Release
+
+Use `entrypoint: release-packages` for npm package release/versioning. Keep npm
+credentials in `release-env`; deploy credentials stay in `deploy-env`.
+
+```yaml
+permissions:
+  contents: write
+  packages: write
+
+steps:
+  - uses: BootstrapLaboratory/rush-delivery@v0.6.0
+    with:
+      entrypoint: release-packages
+      dry-run: "false"
+      toolchain-image-provider: github
+      rush-cache-provider: github
+      release-env: |
+        NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+```
 
 For the broader docs map, start from the [Introduction](../README.md).

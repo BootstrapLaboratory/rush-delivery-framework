@@ -10,6 +10,7 @@ Start from the public contract:
 - Dagger entrypoint parameters.
 - `.dagger/` metadata schemas.
 - Workflow stage inputs and outputs.
+- Package release metadata under `.dagger/release`.
 - Provider adapter boundaries.
 
 Avoid changing source internals before checking whether the same outcome belongs
@@ -30,7 +31,8 @@ selected target truly needs them.
 ## Preserve Stage Boundaries
 
 Detect decides what should run. Build creates compiled outputs. Package
-materializes deploy artifacts. Deploy performs live release actions.
+materializes deploy artifacts. Package release performs registry release and
+versioning actions. Deploy performs live application release actions.
 
 If a change mixes these responsibilities, pause and create a task/design note
 before implementing it.

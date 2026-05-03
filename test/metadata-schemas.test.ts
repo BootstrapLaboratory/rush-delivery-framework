@@ -66,6 +66,10 @@ test("fixture Dagger metadata files satisfy their JSON schemas", async () => {
       schemaPath: "schemas/rush-cache-providers.schema.json",
     },
     {
+      metadataPaths: [".dagger/release/npm.yaml"],
+      schemaPath: "schemas/npm-release.schema.json",
+    },
+    {
       metadataPaths: await listYamlFiles(".dagger/validate/targets"),
       schemaPath: "schemas/validation-target.schema.json",
     },

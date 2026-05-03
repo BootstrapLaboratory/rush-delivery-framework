@@ -30,6 +30,12 @@ import {
 } from "./rush-projects.ts";
 import { parseRushCacheProviders } from "../rush-cache/parse-providers.ts";
 import { rushCacheProvidersPath } from "../rush-cache/metadata-paths.ts";
+import type { NpmReleaseDefinition } from "../model/npm-release.ts";
+import {
+  npmReleaseMetadataPath,
+  releaseMetadataDirectory,
+} from "../stages/release/metadata-paths.ts";
+import { parseNpmRelease } from "../stages/release/parse-npm-release.ts";
 
 type RepositoryPathType = "directory" | "file";
 
@@ -42,6 +48,7 @@ export type MetadataContractRepository = {
 export type MetadataContractValidationResult = {
   deploy_targets: string[];
   package_targets: string[];
+  release_targets: string[];
   rush_projects: string[];
   validation_targets: string[];
 };
@@ -209,6 +216,61 @@ async function validateRushCacheMetadata(
   }
 
   void definition;
+}
+
+async function validateNpmReleaseMetadata(
+  repository: MetadataContractRepository,
+  issues: string[],
+): Promise<NpmReleaseDefinition | undefined> {
+  if (!(await repository.exists(npmReleaseMetadataPath, "file"))) {
+    return undefined;
+  }
+
+  const definition = await readParsed(
+    repository,
+    npmReleaseMetadataPath,
+    "NPM release metadata file",
+    parseNpmRelease,
+    issues,
+  );
+
+  if (!definition) {
+    return undefined;
+  }
+
+  if (definition.auth.kind === "token") {
+    await fileExists(
+      repository,
+      "common/config/rush/.npmrc-publish",
+      "NPM release token auth .npmrc-publish file",
+      issues,
+    );
+  }
+
+  return definition;
+}
+
+async function validateReleaseMetadata(
+  repository: MetadataContractRepository,
+  issues: string[],
+): Promise<string[]> {
+  const releaseTargets = await listYamlTargets(
+    repository,
+    releaseMetadataDirectory,
+    issues,
+  );
+
+  for (const target of releaseTargets) {
+    if (target !== "npm") {
+      issues.push(
+        `Release metadata "${releaseMetadataDirectory}/${target}.yaml" is not supported.`,
+      );
+    }
+  }
+
+  const npmRelease = await validateNpmReleaseMetadata(repository, issues);
+
+  return npmRelease === undefined ? [] : ["npm"];
 }
 
 function validatePackageArtifact(
@@ -467,6 +529,7 @@ export async function validateMetadataContractRepository(
   const issues: string[] = [];
   const rushProjects = await loadRushProjects(repository, issues);
   await validateRushCacheMetadata(repository, issues);
+  const releaseTargets = await validateReleaseMetadata(repository, issues);
   const servicesMesh = await readParsed(
     repository,
     servicesMeshPath,
@@ -539,6 +602,7 @@ export async function validateMetadataContractRepository(
   return {
     deploy_targets: deployTargets,
     package_targets: packageMetadataTargets,
+    release_targets: releaseTargets,
     rush_projects: [...rushProjects.keys()].sort(),
     validation_targets: validationTargets,
   };

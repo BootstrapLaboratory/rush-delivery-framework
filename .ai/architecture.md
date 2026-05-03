@@ -11,7 +11,7 @@ The framework has three layers:
 - Public Dagger API: callable entrypoints such as `workflow`, `validate`, and
   `self-check`.
 - Stage orchestration: source acquisition, detect, validate, build, package,
-  deploy, and workflow composition.
+  package release, deploy, and workflow composition.
 - Metadata contracts: `.dagger/` files that describe targets, dependencies,
   providers, cache inputs, and runtime needs.
 
@@ -28,6 +28,10 @@ Validate runs generic Rush validation and target validation metadata.
 Build runs Rush build work for selected deploy targets.
 
 Package materializes deploy artifacts and writes a package manifest.
+
+Package release reads release metadata, runs the standard Rush lifecycle, lets
+Rush own versioning/publishing behavior, and pushes release commits for package
+registries.
 
 Deploy reads the package manifest and target metadata, then executes targets in
 service-mesh wave order.

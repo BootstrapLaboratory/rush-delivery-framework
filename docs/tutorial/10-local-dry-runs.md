@@ -9,7 +9,7 @@ working tree with `--repo=.` and use `source-mode=local_copy`.
 Run the full workflow without publishing provider artifacts or deploying:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.5.0 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.0 call workflow \
   --repo=. \
   --git-sha="$(git rev-parse HEAD)" \
   --event-name=manual \
@@ -29,7 +29,7 @@ and safe. They do not need GHCR permissions.
 To exercise one target, force it:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.5.0 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.0 call workflow \
   --repo=. \
   --git-sha="$(git rev-parse HEAD)" \
   --event-name=manual \
@@ -47,7 +47,7 @@ runtime env.
 To validate local changes against your main branch:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.5.0 call validate \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.0 call validate \
   --repo=. \
   --event-name=pull_request \
   --pr-base-sha="$(git merge-base HEAD origin/main)" \

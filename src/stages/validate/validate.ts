@@ -28,6 +28,10 @@ import {
 } from "./validation-result.ts";
 import { runValidationMetadataStage } from "./validation-runner.ts";
 import { logSection } from "../../logging/sections.ts";
+import {
+  hasReleaseReadinessValidation,
+  runReleaseReadinessValidation,
+} from "../release/release-readiness.ts";
 
 const CI_PLAN_PATH = ".dagger/runtime/ci-plan.json";
 
@@ -205,8 +209,11 @@ export async function validate(input: ValidateInput): Promise<string> {
     validateTargetsJson,
     rushOptions,
   );
+  const shouldRunReleaseReadiness =
+    eventName === "pull_request" &&
+    (await hasReleaseReadinessValidation(sourceRepo));
 
-  if (ciPlan.validate_targets.length === 0) {
+  if (ciPlan.validate_targets.length === 0 && !shouldRunReleaseReadiness) {
     console.log("[validate] no validate targets selected");
     return formatValidationSummary(createValidationSummary(ciPlan));
   }
@@ -224,9 +231,17 @@ export async function validate(input: ValidateInput): Promise<string> {
     detectedContainer,
     rushOptions,
   );
+  const releaseReadyContainer = shouldRunReleaseReadiness
+    ? await runReleaseReadinessValidation(sourceRepo, rushContainer)
+    : rushContainer;
 
   await (
-    await runValidationStages(sourceRepo, rushContainer, ciPlan, hostEnv)
+    await runValidationStages(
+      sourceRepo,
+      releaseReadyContainer,
+      ciPlan,
+      hostEnv,
+    )
   ).sync();
 
   return formatValidationSummary(createValidationSummary(ciPlan));

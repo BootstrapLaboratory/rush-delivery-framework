@@ -2,8 +2,8 @@
 
 Rush Delivery is a Dagger module and GitHub Action for Rush-based release
 workflows. It owns the release path from source acquisition through detect,
-validate, build, package, and deploy while keeping project-specific behavior in
-metadata.
+validate, build, package, package release, and deploy while keeping
+project-specific behavior in metadata.
 
 Use it when a Rush monorepo needs one repeatable release path across CI and
 local debugging:
@@ -12,6 +12,7 @@ local debugging:
 - run validation and build work through Dagger with explicit metadata-selected
   environment;
 - package deploy artifacts;
+- release npm packages through Rush change files;
 - mount deploy-only runtime files such as cloud credentials;
 - publish deploy tags and provider-backed cache or toolchain images.
 
@@ -46,7 +47,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.5.0
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.0
         with:
           entrypoint: validate
           toolchain-image-provider: github
@@ -75,7 +76,7 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - name: Rush Delivery
-        uses: BootstrapLaboratory/rush-delivery@v0.5.0
+        uses: BootstrapLaboratory/rush-delivery@v0.6.0
         with:
           dry-run: "false"
           environment: prod
@@ -95,6 +96,31 @@ jobs:
 See [GitHub Actions quick start](docs/quick-start/github-actions.md) and
 [GitHub Action usage](docs/github-actions.md) for the full production shape.
 
+### Package Release
+
+Use the `release-packages` entrypoint for npm package release/versioning. It
+uses `.dagger/release/npm.yaml`, runs the standard Rush lifecycle, lets Rush
+apply change files, publishes packages, and pushes the generated version commit.
+
+```yaml
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.0
+        with:
+          entrypoint: release-packages
+          dry-run: "false"
+          toolchain-image-provider: github
+          rush-cache-provider: github
+          release-env: |
+            NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+```
+
 ## CI Using Command Line
 
 Use the raw Dagger command when your CI provider is not GitHub Actions, or when
@@ -104,7 +130,7 @@ This mode clones the target repository inside Dagger, so the CI runner does not
 need to mount the repository into the module.
 
 ```sh
-RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.5.0
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.0
 RUNTIME_FILES_DIR="${RUNNER_TEMP}/rush-delivery-runtime-files"
 DEPLOY_ENV_FILE="${RUNNER_TEMP}/dagger-deploy.env"
 SOURCE_REPOSITORY_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
@@ -149,7 +175,7 @@ available to Dagger and avoids relying on a remote Git ref that does not contain
 your latest changes.
 
 ```sh
-RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.5.0
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.0
 
 dagger -m "${RUSH_DELIVERY_MODULE}" call workflow \
   --repo=. \

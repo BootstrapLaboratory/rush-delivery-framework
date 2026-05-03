@@ -11,7 +11,8 @@ uses the current GitHub repository and ref, writes `GITHUB_TOKEN` into the
 deploy env file for source authentication, and forwards the pull request base
 SHA from the GitHub event. When `entrypoint: validate` is selected, provider
 policies default to `pull-or-build`, so existing toolchain images and Rush cache
-can be reused without granting publish access.
+can be reused without granting publish access. If npm release metadata exists,
+validation also runs Rush change-file verification.
 
 ```yaml
 name: ci-validate
@@ -27,7 +28,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.5.0
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.0
         with:
           entrypoint: validate
           toolchain-image-provider: github
@@ -51,7 +52,7 @@ steps:
     with:
       fetch-depth: 0
 
-  - uses: BootstrapLaboratory/rush-delivery@v0.5.0
+  - uses: BootstrapLaboratory/rush-delivery@v0.6.0
     with:
       entrypoint: validate
       repo: .
@@ -75,7 +76,7 @@ steps:
       service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
   - name: Rush Delivery
-    uses: BootstrapLaboratory/rush-delivery@v0.5.0
+    uses: BootstrapLaboratory/rush-delivery@v0.6.0
     with:
       force-targets-json: ${{ inputs.force_targets_json || '[]' }}
       deploy-tag-prefix: ${{ env.DEPLOY_TAG_PREFIX }}
@@ -104,8 +105,44 @@ steps:
 ```
 
 The action appends `GITHUB_ACTOR`, `GITHUB_REPOSITORY`, `GITHUB_API_URL`, and
-`GITHUB_TOKEN` to the generated deploy env file by default. Set
+`GITHUB_TOKEN` to generated env files by default. Set
 `include-github-env: "false"` if you want to provide those values yourself.
+
+## Package Release
+
+Use `entrypoint: release-packages` when a workflow should publish npm packages
+from `.dagger/release/npm.yaml`. Keep npm credentials in `release-env`, not
+`deploy-env`.
+
+```yaml
+name: package-release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.0
+        with:
+          entrypoint: release-packages
+          dry-run: "false"
+          toolchain-image-provider: github
+          rush-cache-provider: github
+          release-env: |
+            NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+```
+
+The package release entrypoint uses Git source mode by default, runs the
+standard Rush lifecycle, lets Rush apply change files, publishes packages, and
+pushes the generated version commit to the metadata `target_branch`.
 
 ## Runtime Files
 
@@ -138,7 +175,7 @@ The action mode does not replace raw Dagger usage. Local runs, other CI
 providers, and lower-level debugging can still call the module directly:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.5.0 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.0 call workflow \
   --git-sha="$GITHUB_SHA" \
   --source-mode=git \
   --source-repository-url="$SOURCE_REPOSITORY_URL" \

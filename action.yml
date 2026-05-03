@@ -8,7 +8,7 @@ inputs:
     required: false
     default: ""
   entrypoint:
-    description: Rush Delivery Dagger function to call. Supported values are workflow and validate.
+    description: Rush Delivery Dagger function to call. Supported values are workflow, validate, and release-packages.
     required: false
     default: workflow
   workdir:
@@ -89,8 +89,16 @@ inputs:
     description: Existing deploy env file to copy before appending deploy-env.
     required: false
     default: ""
+  release-env:
+    description: Multiline KEY=VALUE package release environment content.
+    required: false
+    default: ""
+  release-env-file:
+    description: Existing package release env file to copy before appending release-env.
+    required: false
+    default: ""
   include-github-env:
-    description: Append GitHub actor, repository, API URL, and token to the deploy env file.
+    description: Append GitHub actor, repository, API URL, and token to generated env files.
     required: false
     default: "true"
   github-token:
@@ -168,6 +176,9 @@ outputs:
   deploy-env-file:
     description: Prepared deploy env file path.
     value: ${{ steps.prepare.outputs.deploy-env-file }}
+  release-env-file:
+    description: Prepared release env file path.
+    value: ${{ steps.prepare.outputs.release-env-file }}
   runtime-files:
     description: Prepared runtime files directory.
     value: ${{ steps.prepare.outputs.runtime-files }}
@@ -193,6 +204,8 @@ runs:
         INPUT_DRY_RUN: ${{ inputs.dry-run }}
         INPUT_DEPLOY_ENV: ${{ inputs.deploy-env }}
         INPUT_DEPLOY_ENV_FILE: ${{ inputs.deploy-env-file }}
+        INPUT_RELEASE_ENV: ${{ inputs.release-env }}
+        INPUT_RELEASE_ENV_FILE: ${{ inputs.release-env-file }}
         INPUT_INCLUDE_GITHUB_ENV: ${{ inputs.include-github-env }}
         INPUT_RUNTIME_FILES: ${{ inputs.runtime-files }}
         INPUT_RUNTIME_FILE_MAP: ${{ inputs.runtime-file-map }}

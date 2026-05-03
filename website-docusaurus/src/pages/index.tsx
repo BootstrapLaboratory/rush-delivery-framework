@@ -22,7 +22,7 @@ const examples = [
     languageLabel: "yaml",
     highlightLanguage: "yaml",
     code: [
-      "uses: BootstrapLaboratory/rush-delivery@v0.5.0",
+      "uses: BootstrapLaboratory/rush-delivery@v0.6.0",
       "with:",
       '  dry-run: "false"',
       "  toolchain-image-provider: github",
@@ -40,7 +40,7 @@ const examples = [
     languageLabel: "sh",
     highlightLanguage: "bash",
     code: [
-      "dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.5.0 call workflow \\",
+      "dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.0 call workflow \\",
       '  --git-sha="${GITHUB_SHA}" \\',
       '  --event-name="${GITHUB_EVENT_NAME}" \\',
       "  --source-mode=git \\",
@@ -56,7 +56,7 @@ const examples = [
     languageLabel: "yaml",
     highlightLanguage: "yaml",
     code: [
-      "uses: BootstrapLaboratory/rush-delivery@v0.5.0",
+      "uses: BootstrapLaboratory/rush-delivery@v0.6.0",
       "with:",
       "  entrypoint: validate",
       "  toolchain-image-provider: github",
@@ -73,7 +73,7 @@ const examples = [
     languageLabel: "yaml",
     highlightLanguage: "yaml",
     code: [
-      "# schemas: https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.5.0/",
+      "# schemas: https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.0/",
       "",
       "# .dagger/deploy/services-mesh.yaml",
       "services:",
@@ -101,6 +101,12 @@ const examples = [
       "  map_env:",
       "    VITE_GRAPHQL_HTTP: WEBAPP_VITE_GRAPHQL_HTTP",
       "    VITE_GRAPHQL_WS: WEBAPP_VITE_GRAPHQL_WS",
+      "",
+      "# .dagger/release/npm.yaml",
+      "kind: npm",
+      "versioning: { strategy: rush-change-files, target_branch: main }",
+      "auth: { kind: token, token_env: NPM_TOKEN }",
+      "publish: { registry: https://registry.npmjs.org/, tag: latest }",
     ].join("\n"),
   },
 ];

@@ -44,6 +44,32 @@ append_env_line() {
 	printf '%s=%s\n' "${name}" "${value}" >>"${env_file}"
 }
 
+append_env_content() {
+	local env_file="$1"
+	local existing_file="$2"
+	local content="$3"
+	local input_name="$4"
+
+	if [[ -n ${existing_file} ]]; then
+		[[ -f ${existing_file} ]] || die "${input_name}-file does not exist: ${existing_file}"
+		cat "${existing_file}" >>"${env_file}"
+		printf '\n' >>"${env_file}"
+	fi
+
+	if [[ -n ${content} ]]; then
+		printf '%s\n' "${content}" >>"${env_file}"
+	fi
+}
+
+append_github_env() {
+	local env_file="$1"
+
+	append_env_line "${env_file}" GITHUB_ACTOR "${GITHUB_ACTOR-}"
+	append_env_line "${env_file}" GITHUB_REPOSITORY "${GITHUB_REPOSITORY-}"
+	append_env_line "${env_file}" GITHUB_API_URL "${RD_GITHUB_API_URL-}"
+	append_env_line "${env_file}" GITHUB_TOKEN "${RD_GITHUB_TOKEN-}"
+}
+
 copy_file_if_present() {
 	local source="$1"
 	local dest="$2"
@@ -106,26 +132,19 @@ module="${INPUT_MODULE:-${GITHUB_ACTION_PATH}}"
 entrypoint="${INPUT_ENTRYPOINT:-workflow}"
 repo_input="${INPUT_REPO-}"
 deploy_env_file="${action_temp}/dagger-deploy.env"
+release_env_file="${action_temp}/dagger-release.env"
 runtime_files="${INPUT_RUNTIME_FILES:-${action_temp}/runtime-files}"
 
 : >"${deploy_env_file}"
+: >"${release_env_file}"
 
-if [[ -n ${INPUT_DEPLOY_ENV_FILE-} ]]; then
-	[[ -f ${INPUT_DEPLOY_ENV_FILE} ]] || die "deploy-env-file does not exist: ${INPUT_DEPLOY_ENV_FILE}"
-	cat "${INPUT_DEPLOY_ENV_FILE}" >>"${deploy_env_file}"
-	printf '\n' >>"${deploy_env_file}"
-fi
-
-if [[ -n ${INPUT_DEPLOY_ENV-} ]]; then
-	printf '%s\n' "${INPUT_DEPLOY_ENV}" >>"${deploy_env_file}"
-fi
+append_env_content "${deploy_env_file}" "${INPUT_DEPLOY_ENV_FILE-}" "${INPUT_DEPLOY_ENV-}" "deploy-env"
+append_env_content "${release_env_file}" "${INPUT_RELEASE_ENV_FILE-}" "${INPUT_RELEASE_ENV-}" "release-env"
 
 case "${INPUT_INCLUDE_GITHUB_ENV:-true}" in
 true | TRUE | True | 1 | yes | YES | Yes | on | ON | On)
-	append_env_line "${deploy_env_file}" GITHUB_ACTOR "${GITHUB_ACTOR-}"
-	append_env_line "${deploy_env_file}" GITHUB_REPOSITORY "${GITHUB_REPOSITORY-}"
-	append_env_line "${deploy_env_file}" GITHUB_API_URL "${RD_GITHUB_API_URL-}"
-	append_env_line "${deploy_env_file}" GITHUB_TOKEN "${RD_GITHUB_TOKEN-}"
+	append_github_env "${deploy_env_file}"
+	append_github_env "${release_env_file}"
 	;;
 *) ;;
 esac
@@ -267,6 +286,19 @@ validate)
 	)
 	append_source_args
 	;;
+releasePackages | release-packages)
+	args=(
+		release-packages
+		"--git-sha=${git_sha}"
+		"--dry-run=${dry_run}"
+		"--release-env-file=${release_env_file}"
+		"--toolchain-image-provider=${toolchain_image_provider}"
+		"--toolchain-image-policy=${toolchain_image_policy}"
+		"--rush-cache-provider=${rush_cache_provider}"
+		"--rush-cache-policy=${rush_cache_policy}"
+	)
+	append_source_args
+	;;
 *)
 	die "unsupported entrypoint: ${entrypoint}"
 	;;
@@ -280,4 +312,5 @@ fi
 write_output module "${module}"
 write_output args "${call_args}"
 write_output deploy-env-file "${deploy_env_file}"
+write_output release-env-file "${release_env_file}"
 write_output runtime-files "${runtime_files}"

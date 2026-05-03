@@ -17,6 +17,8 @@ The example repository uses this layout:
 │   └── targets/
 │       ├── server.yaml
 │       └── webapp.yaml
+├── release/
+│   └── npm.yaml
 ├── rush-cache/
 │   └── providers.yaml
 ├── toolchain-images/
@@ -64,6 +66,17 @@ The example says `webapp` waits for `server`.
 - Which environment variables provide repository, token, and username?
 - Which Rush install paths should be restored and published?
 
+## Package Release
+
+`.dagger/release/npm.yaml` answers:
+
+- Which package release strategy should Rush Delivery use?
+- Which target branch receives Rush version commits?
+- Which npm registry, tag, access level, and token env should be used?
+
+Package release metadata stays separate from deploy target metadata. Rush still
+decides which packages are publishable and how change files affect versions.
+
 ## Validation Targets
 
 `.dagger/validate/targets/*.yaml` answers:
@@ -76,6 +89,7 @@ The example says `webapp` waits for `server`.
 
 - Keep `.dagger` metadata small and declarative.
 - Put provider credentials in CI env, not in metadata.
+- Put npm release credentials in release env, not deploy env.
 - Put executable deployment behavior in scripts.
 - Use metadata to connect Rush projects, package artifacts, and deploy targets.
 

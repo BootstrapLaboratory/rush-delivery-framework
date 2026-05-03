@@ -14,6 +14,7 @@ import { buildDeployTargets } from "./stages/build-stage/build-deploy-targets.ts
 import { packageDeployTargets } from "./stages/package-stage/package-deploy-targets.ts";
 import { parseReleaseTargets } from "./planning/parse-release-targets.ts";
 import { validate as validateRelease } from "./stages/validate/validate.ts";
+import { releasePackages as runReleasePackages } from "./stages/release/release-packages.ts";
 import { workflow as runWorkflow } from "./workflow/workflow.ts";
 import { selfCheck as runSelfCheck } from "./self-check/self-check.ts";
 import {
@@ -278,6 +279,45 @@ export class RushDelivery {
       toolchainImagePolicy,
       toolchainImageProvider,
       validateTargetsJson,
+    });
+  }
+
+  /**
+   * Runs the package release/versioning flow from release metadata.
+   */
+  @func()
+  async releasePackages(
+    gitSha: string = "",
+    dryRun: boolean = true,
+    releaseEnvFile?: File,
+    toolchainImageProvider: string = "off",
+    toolchainImagePolicy: string = "lazy",
+    rushCacheProvider: string = "off",
+    rushCachePolicy: string = "lazy",
+    sourceMode: string = "local_copy",
+    sourceRepositoryUrl: string = "",
+    sourceRef: string = "",
+    sourceAuthTokenEnv: string = "",
+    sourceAuthUsername: string = "",
+    @argument({
+      ignore: ["**/node_modules", ".trunk/out", ".trunk/logs"],
+    })
+    repo?: Directory,
+  ): Promise<string> {
+    return runReleasePackages({
+      dryRun,
+      gitSha,
+      releaseEnvFile,
+      repo,
+      rushCachePolicy,
+      rushCacheProvider,
+      sourceAuthTokenEnv,
+      sourceAuthUsername,
+      sourceMode,
+      sourceRef,
+      sourceRepositoryUrl,
+      toolchainImagePolicy,
+      toolchainImageProvider,
     });
   }
 }
