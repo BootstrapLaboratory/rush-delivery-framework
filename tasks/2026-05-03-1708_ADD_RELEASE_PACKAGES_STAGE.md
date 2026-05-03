@@ -77,22 +77,24 @@ Rush config, such as `common/config/rush/.npmrc-publish`,
   stable inside Dagger.
 - Add `releaseEnvFile` to the new Dagger entrypoint instead of reusing
   `deployEnvFile`.
+- Add GitHub Action inputs `release-env` and `release-env-file`. Keep
+  `deploy-env` and `deploy-env-file` for deploy/workflow compatibility.
 - Run the standard Rush install and lifecycle before live publishing so package
   release does not publish stale outputs.
 - Keep `releasePackages` separate from `workflow` in the first implementation.
+- `releasePackages` should create and push the version commit through Rush so
+  it owns versioning, not only package publishing.
+- Standalone `releasePackages` must not touch deploy tags.
+- Later workflow composition can decide whether deploy tags point at the
+  original source SHA or a generated version commit SHA.
+- Token auth metadata stays simple: `auth.kind: token` and
+  `auth.token_env: NPM_TOKEN`. Rush Delivery passes the configured env into the
+  release command, while the project `.npmrc-publish` decides exactly how npm
+  consumes it.
 
 ## Open Design Questions
 
-- Should `releasePackages` create and push version commits/tags, or should it
-  initially publish versions already committed by the repository?
-- If package release is later composed into `workflow`, should deploy tags point
-  at the original workflow SHA or at a generated version commit SHA?
-- Should token auth always map the configured token env into the npm/Rush env
-  internally, or should metadata expose the exact publish env variable name
-  expected by `.npmrc-publish`?
-- Should the action wrapper expose package release env through the existing
-  `deploy-env` input for compatibility, or introduce a broader workflow env
-  name while keeping `deploy-env` as an alias?
+- None for the first implementation slice.
 
 ## Checklist
 
