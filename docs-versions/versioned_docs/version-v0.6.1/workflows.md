@@ -1,4 +1,8 @@
-# Workflow Guide
+---
+id: "workflows"
+title: "Workflow Guide"
+sidebar_label: "Workflow Guide"
+---
 
 ## Local Framework Check
 
@@ -39,7 +43,7 @@ For GitHub Actions, prefer the repository action wrapper:
 
 ```yaml
 - name: Rush Delivery
-  uses: BootstrapLaboratory/rush-delivery@v0.6.2
+  uses: BootstrapLaboratory/rush-delivery@v0.6.1
   with:
     force-targets-json: ${{ inputs.force_targets_json || '[]' }}
     environment: prod
@@ -50,7 +54,7 @@ For GitHub Actions, prefer the repository action wrapper:
       GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
 ```
 
-See [GitHub Action usage](github-actions.md) for the complete production shape.
+See [GitHub Action usage](../github-action) for the complete production shape.
 
 For pull-request validation, use the same action with the `validate`
 entrypoint. The action defaults provider policies to `pull-or-build` for
@@ -59,7 +63,7 @@ change files:
 
 ```yaml
 - name: Rush Delivery validation
-  uses: BootstrapLaboratory/rush-delivery@v0.6.2
+  uses: BootstrapLaboratory/rush-delivery@v0.6.1
   with:
     entrypoint: validate
     toolchain-image-provider: github
@@ -71,7 +75,7 @@ the release flow is kept separate from deploy workflow composition:
 
 ```yaml
 - name: Rush Delivery package release
-  uses: BootstrapLaboratory/rush-delivery@v0.6.2
+  uses: BootstrapLaboratory/rush-delivery@v0.6.1
   with:
     entrypoint: release-packages
     dry-run: "false"

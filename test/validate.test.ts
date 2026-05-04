@@ -67,7 +67,7 @@ test("summarizes selected validation targets", () => {
   assert.deepEqual(createValidationSummary(ciPlan), {
     mode: "pull_request",
     pr_base_sha: "base-sha",
-    rush_commands: ["verify", "lint", "test", "build"],
+    rush_commands: ["build", "lint", "test", "verify"],
     status: "passed",
     validate_targets: ["api-contract", "server"],
   });

@@ -1,5 +1,5 @@
 const RUSH_SCRIPT = "common/scripts/install-run-rush.js";
-const RUSH_LIFECYCLE_COMMANDS = ["verify", "lint", "test", "build"] as const;
+const RUSH_LIFECYCLE_COMMANDS = ["build", "lint", "test", "verify"] as const;
 
 export type RushLifecycleCommand = (typeof RUSH_LIFECYCLE_COMMANDS)[number];
 

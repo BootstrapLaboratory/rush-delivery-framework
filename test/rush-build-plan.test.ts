@@ -29,12 +29,12 @@ test("builds Rush target args from deploy targets", () => {
   ]);
 });
 
-test("builds Rush verify lint test build steps", () => {
+test("builds Rush build lint test verify steps", () => {
   assert.deepStrictEqual(buildRushBuildSteps(ciPlan), [
     {
       args: [
         "common/scripts/install-run-rush.js",
-        "verify",
+        "build",
         "--to",
         "server",
         "--to",
@@ -67,7 +67,7 @@ test("builds Rush verify lint test build steps", () => {
     {
       args: [
         "common/scripts/install-run-rush.js",
-        "build",
+        "verify",
         "--to",
         "server",
         "--to",
@@ -94,7 +94,7 @@ test("builds Rush validation steps from validate targets", () => {
     {
       args: [
         "common/scripts/install-run-rush.js",
-        "verify",
+        "build",
         "--to",
         "api-contract",
         "--to",
@@ -127,7 +127,7 @@ test("builds Rush validation steps from validate targets", () => {
     {
       args: [
         "common/scripts/install-run-rush.js",
-        "build",
+        "verify",
         "--to",
         "api-contract",
         "--to",
@@ -151,7 +151,7 @@ test("keeps empty validate targets as a no-op", () => {
 test("builds Rush lifecycle steps for every project without target args", () => {
   assert.deepStrictEqual(buildRushAllProjectsLifecycleSteps(), [
     {
-      args: ["common/scripts/install-run-rush.js", "verify"],
+      args: ["common/scripts/install-run-rush.js", "build"],
       command: "node",
     },
     {
@@ -163,7 +163,7 @@ test("builds Rush lifecycle steps for every project without target args", () => 
       command: "node",
     },
     {
-      args: ["common/scripts/install-run-rush.js", "build"],
+      args: ["common/scripts/install-run-rush.js", "verify"],
       command: "node",
     },
   ]);
@@ -180,7 +180,7 @@ test("keeps validation planning separate from deploy targets", () => {
       {
         args: [
           "common/scripts/install-run-rush.js",
-          "verify",
+          "build",
           "--to",
           "server",
         ],
@@ -195,7 +195,12 @@ test("keeps validation planning separate from deploy targets", () => {
         command: "node",
       },
       {
-        args: ["common/scripts/install-run-rush.js", "build", "--to", "server"],
+        args: [
+          "common/scripts/install-run-rush.js",
+          "verify",
+          "--to",
+          "server",
+        ],
         command: "node",
       },
     ],

@@ -1,4 +1,8 @@
-# Public Dagger API
+---
+id: "api"
+title: "Public API"
+sidebar_label: "Public API"
+---
 
 When consuming this module from CI, prefer Git source mode so Dagger clones the
 Rush repository internally. Use `--repo=.` only for local-copy runs against a
@@ -9,7 +13,7 @@ RUSH_DELIVERY_MODULE=github.com/OWNER/rush-delivery@VERSION
 ```
 
 GitHub Actions can use the root action wrapper instead of assembling the raw
-command. See [GitHub Action usage](github-actions.md).
+command. See [GitHub Action usage](../github-action).
 
 ## Entrypoints
 
@@ -76,17 +80,17 @@ dagger -m "$RUSH_DELIVERY_MODULE" call release-packages \
 ```
 
 Live package releases require Git source mode with write credentials. Rush
-Delivery runs the shared Rush lifecycle in build-first order (`build`, `lint`,
-`test`, `verify`), lets Rush apply the change files, publishes packages, and
-pushes the version commit back to the configured target branch. Dry-runs run the
-same planning path without pushing commits, tags, or packages.
+Delivery runs the standard Rush lifecycle, lets Rush apply the change files,
+publishes packages, and pushes the version commit back to the configured target
+branch. Dry-runs run the same planning path without pushing commits, tags, or
+packages.
 
 `releasePackages` uses a release-scoped metadata contract. It requires Rush
 project metadata and `.dagger/release/npm.yaml`, but it does not require deploy
 metadata. Rush cache provider metadata is only required when the selected Rush
 cache provider is not `off`.
 
-See [Entrypoints reference](entrypoints.md) for every callable function,
+See [Entrypoints reference](../entrypoints) for every callable function,
 including separate `detect`, `build`, `package`, `deploy`, metadata validation,
 and diagnostic entrypoints.
 

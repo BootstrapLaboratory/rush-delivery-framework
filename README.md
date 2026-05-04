@@ -47,7 +47,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.1
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.2
         with:
           entrypoint: validate
           toolchain-image-provider: github
@@ -76,7 +76,7 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - name: Rush Delivery
-        uses: BootstrapLaboratory/rush-delivery@v0.6.1
+        uses: BootstrapLaboratory/rush-delivery@v0.6.2
         with:
           dry-run: "false"
           environment: prod
@@ -99,9 +99,10 @@ See [GitHub Actions quick start](docs/quick-start/github-actions.md) and
 ### Package Release
 
 Use the `release-packages` entrypoint for npm package release/versioning. It
-uses `.dagger/release/npm.yaml`, runs the standard Rush lifecycle, lets Rush
-apply change files, publishes packages, and pushes the generated version commit.
-Package-only repositories do not need deploy metadata for this entrypoint.
+uses `.dagger/release/npm.yaml`, runs the shared Rush lifecycle in build-first
+order (`build`, `lint`, `test`, `verify`), lets Rush apply change files,
+publishes packages, and pushes the generated version commit. Package-only
+repositories do not need deploy metadata for this entrypoint.
 
 ```yaml
 permissions:
@@ -112,7 +113,7 @@ jobs:
   release-packages:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.1
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.2
         with:
           entrypoint: release-packages
           dry-run: "false"
@@ -131,7 +132,7 @@ This mode clones the target repository inside Dagger, so the CI runner does not
 need to mount the repository into the module.
 
 ```sh
-RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.1
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.2
 RUNTIME_FILES_DIR="${RUNNER_TEMP}/rush-delivery-runtime-files"
 DEPLOY_ENV_FILE="${RUNNER_TEMP}/dagger-deploy.env"
 SOURCE_REPOSITORY_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
@@ -176,7 +177,7 @@ available to Dagger and avoids relying on a remote Git ref that does not contain
 your latest changes.
 
 ```sh
-RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.1
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.2
 
 dagger -m "${RUSH_DELIVERY_MODULE}" call workflow \
   --repo=. \

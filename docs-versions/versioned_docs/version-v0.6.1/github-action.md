@@ -1,4 +1,9 @@
-# GitHub Action Usage
+---
+id: "github-action"
+title: "GitHub Action"
+sidebar_label: "GitHub Action"
+description: "Use Rush Delivery directly from GitHub Actions."
+---
 
 Rush Delivery can be used as a GitHub Action or as a raw Dagger module. The
 GitHub Action is a thin adapter over the module's Dagger functions, so release
@@ -28,7 +33,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.2
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.1
         with:
           entrypoint: validate
           toolchain-image-provider: github
@@ -52,7 +57,7 @@ steps:
     with:
       fetch-depth: 0
 
-  - uses: BootstrapLaboratory/rush-delivery@v0.6.2
+  - uses: BootstrapLaboratory/rush-delivery@v0.6.1
     with:
       entrypoint: validate
       repo: .
@@ -76,7 +81,7 @@ steps:
       service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
   - name: Rush Delivery
-    uses: BootstrapLaboratory/rush-delivery@v0.6.2
+    uses: BootstrapLaboratory/rush-delivery@v0.6.1
     with:
       force-targets-json: ${{ inputs.force_targets_json || '[]' }}
       deploy-tag-prefix: ${{ env.DEPLOY_TAG_PREFIX }}
@@ -130,7 +135,7 @@ jobs:
   release-packages:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.2
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.1
         with:
           entrypoint: release-packages
           dry-run: "false"
@@ -140,10 +145,9 @@ jobs:
             NPM_TOKEN=${{ secrets.NPM_TOKEN }}
 ```
 
-The package release entrypoint uses Git source mode by default, runs the shared
-Rush lifecycle in build-first order (`build`, `lint`, `test`, `verify`), lets
-Rush apply change files, publishes packages, and pushes the generated version
-commit to the metadata `target_branch`.
+The package release entrypoint uses Git source mode by default, runs the
+standard Rush lifecycle, lets Rush apply change files, publishes packages, and
+pushes the generated version commit to the metadata `target_branch`.
 
 For package-only repositories that do not use Rush Delivery cache metadata, set
 `rush-cache-provider: off` or omit the input. `.dagger/rush-cache/providers.yaml`
@@ -180,7 +184,7 @@ The action mode does not replace raw Dagger usage. Local runs, other CI
 providers, and lower-level debugging can still call the module directly:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.2 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.1 call workflow \
   --git-sha="$GITHUB_SHA" \
   --source-mode=git \
   --source-repository-url="$SOURCE_REPOSITORY_URL" \
