@@ -53,6 +53,11 @@ export type MetadataContractValidationResult = {
   validation_targets: string[];
 };
 
+export type MetadataContractValidationOptions = {
+  require_deploy_metadata?: boolean;
+  require_rush_cache_metadata?: boolean;
+};
+
 function formatIssueList(issues: string[]): string {
   return [
     "Dagger metadata contract validation failed:",
@@ -191,15 +196,16 @@ async function loadRushProjects(
 async function validateRushCacheMetadata(
   repository: MetadataContractRepository,
   issues: string[],
+  required: boolean,
 ): Promise<void> {
-  if (
-    !(await fileExists(
-      repository,
-      rushCacheProvidersPath,
-      "Rush cache provider metadata file",
-      issues,
-    ))
-  ) {
+  const exists = await repository.exists(rushCacheProvidersPath, "file");
+
+  if (!exists) {
+    if (required) {
+      issues.push(
+        `Rush cache provider metadata file "${rushCacheProvidersPath}" must exist.`,
+      );
+    }
     return;
   }
 
@@ -525,11 +531,34 @@ function validateNoOrphanTargets(
 
 export async function validateMetadataContractRepository(
   repository: MetadataContractRepository,
+  options: MetadataContractValidationOptions = {},
 ): Promise<MetadataContractValidationResult> {
+  const requireDeployMetadata = options.require_deploy_metadata ?? true;
+  const requireRushCacheMetadata =
+    options.require_rush_cache_metadata ?? true;
   const issues: string[] = [];
   const rushProjects = await loadRushProjects(repository, issues);
-  await validateRushCacheMetadata(repository, issues);
+  await validateRushCacheMetadata(
+    repository,
+    issues,
+    requireRushCacheMetadata,
+  );
   const releaseTargets = await validateReleaseMetadata(repository, issues);
+
+  if (!requireDeployMetadata) {
+    if (issues.length > 0) {
+      throw new Error(formatIssueList(issues));
+    }
+
+    return {
+      deploy_targets: [],
+      package_targets: [],
+      release_targets: releaseTargets,
+      rush_projects: [...rushProjects.keys()].sort(),
+      validation_targets: [],
+    };
+  }
+
   const servicesMesh = await readParsed(
     repository,
     servicesMeshPath,

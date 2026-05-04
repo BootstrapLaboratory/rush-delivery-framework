@@ -4,7 +4,10 @@ import { deployRelease } from "../stages/deploy/deploy-release.ts";
 import { logSection } from "../logging/sections.ts";
 import { validateMetadataContract } from "../metadata/dagger-metadata-contract.ts";
 import { formatMetadataContractValidationResult } from "../metadata/metadata-contract.ts";
-import { resolveRushProviderOptions } from "../rush/provider-options.ts";
+import {
+  requiresRushCacheProviderMetadata,
+  resolveRushProviderOptions,
+} from "../rush/provider-options.ts";
 import { parseDeployEnvFile } from "../stages/deploy/runtime-env.ts";
 import { resolveSource } from "../source/resolve-source.ts";
 import { buildWorkflowSourcePlan } from "../source/source-options.ts";
@@ -85,7 +88,11 @@ export async function workflow(input: WorkflowInput): Promise<string> {
 
   console.log(
     formatMetadataContractValidationResult(
-      await validateMetadataContract(sourceRepo),
+      await validateMetadataContract(sourceRepo, {
+        require_rush_cache_metadata: requiresRushCacheProviderMetadata({
+          rushCacheProvider,
+        }),
+      }),
     ),
   );
 

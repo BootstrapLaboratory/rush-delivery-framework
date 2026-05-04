@@ -9,7 +9,10 @@ import { resolveSource } from "../../source/resolve-source.ts";
 import { buildSourceAcquisitionPlan } from "../../source/source-options.ts";
 import { buildRushValidationSteps } from "../build-stage/rush-build-plan.ts";
 import { RUSH_WORKDIR } from "../../rush/container.ts";
-import { resolveRushProviderOptions } from "../../rush/provider-options.ts";
+import {
+  requiresRushCacheProviderMetadata,
+  resolveRushProviderOptions,
+} from "../../rush/provider-options.ts";
 import {
   installRushWithCache,
   prepareRushWorkflowContainer,
@@ -190,7 +193,11 @@ export async function validate(input: ValidateInput): Promise<string> {
   console.log(`[source] mode=${sourcePlan.mode}`);
   const sourceRepo = await resolveSource(sourcePlan, { hostEnv, repo });
 
-  await assertMetadataContract(sourceRepo);
+  await assertMetadataContract(sourceRepo, {
+    require_rush_cache_metadata: requiresRushCacheProviderMetadata({
+      rushCacheProvider,
+    }),
+  });
 
   const rushOptions = {
     hostEnv,

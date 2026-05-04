@@ -10,7 +10,10 @@ import type { GitSourcePlan, SourcePlan } from "../../model/source.ts";
 import { formatMetadataContractValidationResult } from "../../metadata/metadata-contract.ts";
 import { validateMetadataContract } from "../../metadata/dagger-metadata-contract.ts";
 import { buildRushAllProjectsLifecycleSteps } from "../../rush/rush-command-plan.ts";
-import { resolveRushProviderOptions } from "../../rush/provider-options.ts";
+import {
+  requiresRushCacheProviderMetadata,
+  resolveRushProviderOptions,
+} from "../../rush/provider-options.ts";
 import {
   installRushWithCache,
   prepareRushWorkflowContainer,
@@ -282,7 +285,12 @@ export async function releasePackages(
   logSection("Metadata contract");
   console.log(
     formatMetadataContractValidationResult(
-      await validateMetadataContract(sourceRepo),
+      await validateMetadataContract(sourceRepo, {
+        require_deploy_metadata: false,
+        require_rush_cache_metadata: requiresRushCacheProviderMetadata({
+          rushCacheProvider,
+        }),
+      }),
     ),
   );
 

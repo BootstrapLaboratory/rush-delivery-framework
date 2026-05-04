@@ -205,6 +205,37 @@ function validMetadataFiles(): Record<string, string> {
   };
 }
 
+function releaseOnlyMetadataFiles(): Record<string, string> {
+  return {
+    ".dagger/release/npm.yaml": [
+      "kind: npm",
+      "versioning:",
+      "  strategy: rush-change-files",
+      "  target_branch: main",
+      "auth:",
+      "  kind: token",
+      "  token_env: NPM_TOKEN",
+      "publish:",
+      "  registry: https://registry.npmjs.org/",
+      "  tag: latest",
+      "  access: public",
+      "  provenance: true",
+      "",
+    ].join("\n"),
+    "common/config/rush/.npmrc-publish":
+      "//registry.npmjs.org/:_authToken=${NPM_TOKEN}\n",
+    "packages/library/package.json": "{}",
+    "rush.json": JSON.stringify({
+      projects: [
+        {
+          packageName: "@example/library",
+          projectFolder: "packages/library",
+        },
+      ],
+    }),
+  };
+}
+
 test("validates the fixture repository metadata contract", async () => {
   const result = await validateMetadataContractRepository(
     new LocalMetadataRepository(repoRoot),
@@ -227,6 +258,72 @@ test("accepts a complete framework metadata contract", async () => {
   assert.deepEqual(result.package_targets, ["server", "webapp"]);
   assert.deepEqual(result.release_targets, ["npm"]);
   assert.deepEqual(result.validation_targets, ["server"]);
+});
+
+test("accepts release-only metadata without deploy or cache metadata when scoped for package release", async () => {
+  const result = await validateMetadataContractRepository(
+    new MemoryMetadataRepository(releaseOnlyMetadataFiles()),
+    {
+      require_deploy_metadata: false,
+      require_rush_cache_metadata: false,
+    },
+  );
+
+  assert.deepEqual(result.deploy_targets, []);
+  assert.deepEqual(result.package_targets, []);
+  assert.deepEqual(result.release_targets, ["npm"]);
+  assert.deepEqual(result.rush_projects, ["@example/library"]);
+  assert.deepEqual(result.validation_targets, []);
+});
+
+test("still validates optional Rush cache metadata when present", async () => {
+  const files = validMetadataFiles();
+
+  files[".dagger/rush-cache/providers.yaml"] += "unexpected: true\n";
+
+  await assert.rejects(
+    () =>
+      validateMetadataContractRepository(new MemoryMetadataRepository(files), {
+        require_rush_cache_metadata: false,
+      }),
+    (error) => {
+      assert.ok(error instanceof Error);
+      assert.match(
+        error.message,
+        /Rush cache provider metadata file ".+providers\.yaml" is invalid: Rush cache providers file has unsupported field: unexpected\./,
+      );
+      return true;
+    },
+  );
+});
+
+test("requires Rush cache metadata only when requested", async () => {
+  const files = validMetadataFiles();
+
+  delete files[".dagger/rush-cache/providers.yaml"];
+
+  await assert.rejects(
+    () =>
+      validateMetadataContractRepository(new MemoryMetadataRepository(files)),
+    (error) => {
+      assert.ok(error instanceof Error);
+      assert.match(
+        error.message,
+        /Rush cache provider metadata file ".+providers\.yaml" must exist\./,
+      );
+      return true;
+    },
+  );
+
+  const result = await validateMetadataContractRepository(
+    new MemoryMetadataRepository(files),
+    {
+      require_rush_cache_metadata: false,
+    },
+  );
+
+  assert.deepEqual(result.deploy_targets, ["server", "webapp"]);
+  assert.deepEqual(result.release_targets, ["npm"]);
 });
 
 test("accepts adding a deploy target through metadata only", async () => {

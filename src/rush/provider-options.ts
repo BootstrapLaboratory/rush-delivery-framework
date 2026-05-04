@@ -39,6 +39,20 @@ export type RushProviderOptions = {
   toolchainImageProviders?: ToolchainImageProvidersDefinition;
 };
 
+export function requiresRushCacheProviderMetadata(
+  input: RushProviderInput = {},
+): boolean {
+  return parseRushCacheProvider(input.rushCacheProvider ?? "off") !== "off";
+}
+
+const disabledRushCacheProviders: RushCacheProvidersDefinition = {
+  cache: {
+    paths: [],
+    version: "off",
+  },
+  providers: {},
+};
+
 export async function resolveRushProviderOptions(
   repo: Directory,
   input: RushProviderInput = {},
@@ -59,9 +73,12 @@ export async function resolveRushProviderOptions(
       : parseToolchainImageProviders(
           await repo.file(toolchainImageProvidersPath).contents(),
         );
-  const rushCacheProviders = parseRushCacheProviders(
-    await repo.file(rushCacheProvidersPath).contents(),
-  );
+  const rushCacheProviders =
+    rushCacheProvider === "off"
+      ? disabledRushCacheProviders
+      : parseRushCacheProviders(
+          await repo.file(rushCacheProvidersPath).contents(),
+        );
 
   return {
     rushCachePolicy,

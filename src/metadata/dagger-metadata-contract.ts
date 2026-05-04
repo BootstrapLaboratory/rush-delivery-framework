@@ -2,6 +2,7 @@ import { Directory, ExistsType } from "@dagger.io/dagger";
 
 import {
   type MetadataContractRepository,
+  type MetadataContractValidationOptions,
   type MetadataContractValidationResult,
   validateMetadataContractRepository,
 } from "./metadata-contract.ts";
@@ -36,12 +37,17 @@ class DaggerMetadataContractRepository implements MetadataContractRepository {
 
 export async function validateMetadataContract(
   repo: Directory,
+  options: MetadataContractValidationOptions = {},
 ): Promise<MetadataContractValidationResult> {
   return validateMetadataContractRepository(
     new DaggerMetadataContractRepository(repo),
+    options,
   );
 }
 
-export async function assertMetadataContract(repo: Directory): Promise<void> {
-  await validateMetadataContract(repo);
+export async function assertMetadataContract(
+  repo: Directory,
+  options: MetadataContractValidationOptions = {},
+): Promise<void> {
+  await validateMetadataContract(repo, options);
 }

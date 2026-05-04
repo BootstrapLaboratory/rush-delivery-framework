@@ -1,20 +1,24 @@
-# Metadata Contracts
+---
+id: "metadata"
+title: "Metadata"
+sidebar_label: "Metadata"
+---
 
 Project-specific behavior lives under `.dagger` in the caller's Rush
 repository. This module treats those files as the public extension contract.
 
 Exact field validation is defined by JSON schemas under
-[`../schemas`](../schemas).
+[`../schemas`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.0/schemas).
 
 For editor integration in external projects, prefer exact versioned schema
 URLs. For example:
 
 ```yaml
-# yaml-language-server: $schema=https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.1/deploy-target.schema.json
+# yaml-language-server: $schema=https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.0/deploy-target.schema.json
 ```
 
 The root `https://bootstraplaboratory.github.io/rush-delivery/schemas/` URLs
-track the current release. Exact paths such as `/schemas/v0.6.1/...` are the
+track the current release. Exact paths such as `/schemas/v0.6.0/...` are the
 stable contract for projects pinned to that Rush Delivery version.
 
 ## Package Release
@@ -23,16 +27,12 @@ Package release metadata lives in `.dagger/release/npm.yaml`. It is separate
 from deploy target metadata because npm package releases are registry side
 effects, not deploy mesh targets.
 
-Repositories that only use `release-packages` do not need deploy metadata such
-as `.dagger/deploy/services-mesh.yaml`. Rush cache metadata is only required
-when a Rush cache provider such as `github` is enabled.
-
 The first supported release strategy uses Rush change files. Rush remains the
 source of truth for package selection, version changes, changelogs, and
 publishable package rules.
 
 ```yaml
-# yaml-language-server: $schema=https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.1/npm-release.schema.json
+# yaml-language-server: $schema=https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.0/npm-release.schema.json
 
 kind: npm
 
@@ -64,7 +64,7 @@ lets Rush apply the change files, publishes packages, and pushes the generated
 version commit back to `versioning.target_branch`.
 
 Schema:
-[`../schemas/npm-release.schema.json`](../schemas/npm-release.schema.json)
+[`../schemas/npm-release.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.0/schemas/npm-release.schema.json)
 
 ## Deploy Services Mesh
 
@@ -75,7 +75,7 @@ Schema:
 - Service names must match deploy target metadata names.
 
 Schema:
-[`../schemas/deploy-services-mesh.schema.json`](../schemas/deploy-services-mesh.schema.json)
+[`../schemas/deploy-services-mesh.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.0/schemas/deploy-services-mesh.schema.json)
 
 ## Deploy Targets
 
@@ -137,7 +137,7 @@ output name with different values, Rush Delivery fails instead of silently
 overriding one value with another.
 
 Schema:
-[`../schemas/deploy-target.schema.json`](../schemas/deploy-target.schema.json)
+[`../schemas/deploy-target.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.0/schemas/deploy-target.schema.json)
 
 ## Package Targets
 
@@ -179,7 +179,7 @@ Supported artifact types:
 - `rush_deploy_archive`: a Rush deploy output packaged for a deploy target.
 
 Schema:
-[`../schemas/package-target.schema.json`](../schemas/package-target.schema.json)
+[`../schemas/package-target.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.0/schemas/package-target.schema.json)
 
 ## Validation Targets
 
@@ -189,7 +189,7 @@ They declare optional backing services and ordered validation steps. This keeps
 target-specific smoke checks in metadata while the runner stays generic.
 
 Schema:
-[`../schemas/validation-target.schema.json`](../schemas/validation-target.schema.json)
+[`../schemas/validation-target.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.0/schemas/validation-target.schema.json)
 
 ## Toolchain Images
 
@@ -201,7 +201,7 @@ Provider `off` needs no metadata. Provider `github` uses GHCR with environment
 keys for repository, username, and token.
 
 Schema:
-[`../schemas/toolchain-image-providers.schema.json`](../schemas/toolchain-image-providers.schema.json)
+[`../schemas/toolchain-image-providers.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.0/schemas/toolchain-image-providers.schema.json)
 
 ## Rush Cache
 
@@ -217,4 +217,4 @@ The `cache` section defines:
 The `providers` section declares optional storage adapters.
 
 Schema:
-[`../schemas/rush-cache-providers.schema.json`](../schemas/rush-cache-providers.schema.json)
+[`../schemas/rush-cache-providers.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.0/schemas/rush-cache-providers.schema.json)

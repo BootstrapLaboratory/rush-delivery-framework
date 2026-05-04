@@ -1,6 +1,8 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
+import type { Directory } from "@dagger.io/dagger";
 
+import { resolveRushProviderOptions } from "../src/rush/provider-options.ts";
 import { buildGithubRushCacheReference } from "../src/rush-cache/github-reference.ts";
 import {
   parseRushCachePolicy,
@@ -20,6 +22,24 @@ import {
   RUSH_CACHE_TAG_PATTERN,
   rushCacheTag,
 } from "../src/rush-cache/spec.ts";
+
+function fakeDirectory(files: Record<string, string>): Directory {
+  return {
+    file(filePath: string) {
+      return {
+        async contents() {
+          const contents = files[filePath];
+
+          if (contents === undefined) {
+            throw new Error(`Unexpected file read: ${filePath}`);
+          }
+
+          return contents;
+        },
+      };
+    },
+  } as unknown as Directory;
+}
 
 test("parses GitHub Rush cache provider metadata", () => {
   const providers = parseRushCacheProviders(`
@@ -80,6 +100,22 @@ providers:
     repository_env: "GITHUB_REPOSITORY",
     token_env: "GITHUB_TOKEN",
     username_env: "GITHUB_ACTOR",
+  });
+});
+
+test("resolves Rush cache provider off without provider metadata", async () => {
+  const options = await resolveRushProviderOptions(fakeDirectory({}), {
+    rushCacheProvider: "off",
+    toolchainImageProvider: "off",
+  });
+
+  assert.equal(options.rushCacheProvider, "off");
+  assert.deepEqual(options.rushCacheProviders, {
+    cache: {
+      paths: [],
+      version: "off",
+    },
+    providers: {},
   });
 });
 

@@ -1,4 +1,7 @@
-# Adapt To Your Project
+---
+title: "Adapt To Your Project"
+sidebar_label: "Adapt To Your Project"
+---
 
 The example repository is intentionally concrete, but your project does not
 need to copy its cloud providers or application stack. Copy the contracts and
@@ -110,9 +113,9 @@ Deploy scripts depending on the whole repo:
 - PR and release workflows use different permissions and policies.
 - Local dry-runs work before live deployment.
 
-From here, use the [Metadata](../metadata.md) and [Provider Adapters](../providers.md)
+From here, use the [Metadata](../../metadata) and [Provider Adapters](../../providers)
 references when you need exact schema details.
 
 For editor validation, point metadata files at exact published schema versions
 such as
-`https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.1/deploy-target.schema.json`.
+`https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.0/deploy-target.schema.json`.
