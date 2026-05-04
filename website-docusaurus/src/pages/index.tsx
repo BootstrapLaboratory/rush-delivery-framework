@@ -22,7 +22,7 @@ const examples = [
     languageLabel: "yaml",
     highlightLanguage: "yaml",
     code: [
-      "uses: BootstrapLaboratory/rush-delivery@v0.6.2",
+      "uses: BootstrapLaboratory/rush-delivery@v0.6.3",
       "with:",
       '  dry-run: "false"',
       "  toolchain-image-provider: github",
@@ -40,7 +40,7 @@ const examples = [
     languageLabel: "sh",
     highlightLanguage: "bash",
     code: [
-      "dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.2 call workflow \\",
+      "dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.3 call workflow \\",
       '  --git-sha="${GITHUB_SHA}" \\',
       '  --event-name="${GITHUB_EVENT_NAME}" \\',
       "  --source-mode=git \\",
@@ -56,7 +56,7 @@ const examples = [
     languageLabel: "yaml",
     highlightLanguage: "yaml",
     code: [
-      "uses: BootstrapLaboratory/rush-delivery@v0.6.2",
+      "uses: BootstrapLaboratory/rush-delivery@v0.6.3",
       "with:",
       "  entrypoint: validate",
       "  toolchain-image-provider: github",
@@ -73,7 +73,7 @@ const examples = [
     languageLabel: "yaml",
     highlightLanguage: "yaml",
     code: [
-      "# schemas: https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.2/",
+      "# schemas: https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.3/",
       "",
       "# .dagger/deploy/services-mesh.yaml",
       "services:",

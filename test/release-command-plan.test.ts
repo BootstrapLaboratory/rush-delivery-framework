@@ -7,6 +7,7 @@ import {
   buildRushChangeVerifyStep,
   buildRushPublishStep,
 } from "../src/stages/release/release-command-plan.ts";
+import { RELEASE_GIT_AUTH_ENV_NAMES } from "../src/stages/release/git-auth-env.ts";
 
 const releaseDefinition: NpmReleaseDefinition = {
   auth: {
@@ -80,4 +81,10 @@ test("builds release branch push command", () => {
     args: ["push", "origin", "main", "--follow-tags"],
     command: "git",
   });
+});
+
+test("keeps release Git auth env names out of Rush reserved namespace", () => {
+  for (const name of RELEASE_GIT_AUTH_ENV_NAMES) {
+    assert.equal(name.startsWith("RUSH_"), false);
+  }
 });

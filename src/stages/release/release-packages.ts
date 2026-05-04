@@ -23,6 +23,11 @@ import { resolveSource } from "../../source/resolve-source.ts";
 import { buildSourceAcquisitionPlan } from "../../source/source-options.ts";
 import { logSection } from "../../logging/sections.ts";
 import { parseDeployEnvFile } from "../deploy/runtime-env.ts";
+import {
+  RELEASE_GIT_REPOSITORY_URL_ENV,
+  RELEASE_GIT_TOKEN_ENV,
+  RELEASE_GIT_USERNAME_ENV,
+} from "./git-auth-env.ts";
 import { loadOptionalNpmReleaseMetadata } from "./load-release-metadata.ts";
 import {
   buildGitPushReleaseStep,
@@ -60,6 +65,12 @@ type ReleasePackagesSummary = {
   };
 };
 
+type GitPushAuth = {
+  repositoryUrl: string;
+  token: string;
+  username: string;
+};
+
 function requireHostEnv(
   hostEnv: Record<string, string>,
   name: string,
@@ -87,6 +98,29 @@ function requireGitSourcePlan(
   }
 
   return sourcePlan;
+}
+
+function resolveGitPushAuth(
+  sourcePlan: SourcePlan,
+  hostEnv: Record<string, string>,
+  dryRun: boolean,
+): GitPushAuth | undefined {
+  if (dryRun) {
+    return undefined;
+  }
+
+  const gitSourcePlan = requireGitSourcePlan(sourcePlan, "NPM package release");
+  const token = requireHostEnv(
+    hostEnv,
+    gitSourcePlan.auth!.tokenEnv,
+    "NPM package release Git push",
+  );
+
+  return {
+    repositoryUrl: gitSourcePlan.repositoryUrl,
+    token,
+    username: gitSourcePlan.auth!.username,
+  };
 }
 
 function withNpmPublishAuth(
@@ -123,49 +157,66 @@ function withNpmPublishEnvironment(
   return container.withEnvVariable("NPM_CONFIG_PROVENANCE", "true");
 }
 
-function withGitPushAuth(
-  container: Container,
-  sourcePlan: SourcePlan,
-  hostEnv: Record<string, string>,
-  dryRun: boolean,
-): Container {
+function withGitAuthorIdentity(container: Container, dryRun: boolean): Container {
   if (dryRun) {
     return container;
   }
 
-  const gitSourcePlan = requireGitSourcePlan(sourcePlan, "NPM package release");
-  const tokenEnv = gitSourcePlan.auth!.tokenEnv;
-  const token = requireHostEnv(
-    hostEnv,
-    tokenEnv,
-    "NPM package release Git push",
+  return container.withExec(
+    [
+      "bash",
+      "-lc",
+      [
+        'git config --local user.name "${GIT_AUTHOR_NAME:-rush-delivery}"',
+        'git config --local user.email "${GIT_AUTHOR_EMAIL:-rush-delivery@users.noreply.github.com}"',
+      ].join(" && "),
+    ],
+    {
+      expand: false,
+    },
   );
-  const tokenSecret = dag.setSecret("rush-delivery-git-push-token", token);
+}
+
+function withGitPushAuth(container: Container, auth: GitPushAuth): Container {
+  const tokenSecret = dag.setSecret("rush-delivery-git-push-token", auth.token);
 
   return container
-    .withSecretVariable("RUSH_DELIVERY_GIT_TOKEN", tokenSecret)
-    .withEnvVariable("RUSH_DELIVERY_GIT_USERNAME", gitSourcePlan.auth!.username)
-    .withEnvVariable(
-      "RUSH_DELIVERY_GIT_REPOSITORY_URL",
-      gitSourcePlan.repositoryUrl,
-    )
+    .withSecretVariable(RELEASE_GIT_TOKEN_ENV, tokenSecret)
+    .withEnvVariable(RELEASE_GIT_USERNAME_ENV, auth.username)
+    .withEnvVariable(RELEASE_GIT_REPOSITORY_URL_ENV, auth.repositoryUrl)
     .withExec(
       [
         "bash",
         "-lc",
         [
-          'case "${RUSH_DELIVERY_GIT_REPOSITORY_URL}" in http://*|https://*) ;; *) echo "NPM package release requires an HTTP(S) Git source URL for token push auth." >&2; exit 1 ;; esac',
-          'git config --local user.name "${GIT_AUTHOR_NAME:-rush-delivery}"',
-          'git config --local user.email "${GIT_AUTHOR_EMAIL:-rush-delivery@users.noreply.github.com}"',
-          'if git remote get-url origin >/dev/null 2>&1; then git remote set-url origin "${RUSH_DELIVERY_GIT_REPOSITORY_URL}"; else git remote add origin "${RUSH_DELIVERY_GIT_REPOSITORY_URL}"; fi',
-          'encoded="$(printf "%s:%s" "${RUSH_DELIVERY_GIT_USERNAME}" "${RUSH_DELIVERY_GIT_TOKEN}" | base64 | tr -d "\\n")"',
-          'git config --local "http.${RUSH_DELIVERY_GIT_REPOSITORY_URL}.extraheader" "AUTHORIZATION: basic ${encoded}"',
+          `case "\${${RELEASE_GIT_REPOSITORY_URL_ENV}}" in http://*|https://*) ;; *) echo "NPM package release requires an HTTP(S) Git source URL for token push auth." >&2; exit 1 ;; esac`,
+          `if git remote get-url origin >/dev/null 2>&1; then git remote set-url origin "\${${RELEASE_GIT_REPOSITORY_URL_ENV}}"; else git remote add origin "\${${RELEASE_GIT_REPOSITORY_URL_ENV}}"; fi`,
+          `encoded="$(printf "%s:%s" "\${${RELEASE_GIT_USERNAME_ENV}}" "\${${RELEASE_GIT_TOKEN_ENV}}" | base64 | tr -d "\\n")"`,
+          `git config --local "http.\${${RELEASE_GIT_REPOSITORY_URL_ENV}}.extraheader" "AUTHORIZATION: basic \${encoded}"`,
         ].join(" && "),
       ],
       {
         expand: false,
       },
     );
+}
+
+function prepareNpmReleaseContainer(
+  container: Container,
+  definition: NpmReleaseDefinition,
+  hostEnv: Record<string, string>,
+  dryRun: boolean,
+): Container {
+  return withNpmPublishEnvironment(
+    withNpmPublishAuth(
+      withGitAuthorIdentity(container, dryRun),
+      definition,
+      hostEnv,
+      dryRun,
+    ),
+    definition,
+    dryRun,
+  );
 }
 
 function runRushLifecycle(container: Container): Container {
@@ -192,14 +243,11 @@ function runNpmRelease(
 ): Container {
   logSection("NPM package release");
 
-  let nextContainer = withNpmPublishEnvironment(
-    withNpmPublishAuth(
-      withGitPushAuth(container, sourcePlan, hostEnv, dryRun),
-      definition,
-      hostEnv,
-      dryRun,
-    ),
+  const gitPushAuth = resolveGitPushAuth(sourcePlan, hostEnv, dryRun);
+  let nextContainer = prepareNpmReleaseContainer(
+    container,
     definition,
+    hostEnv,
     dryRun,
   );
   const publishStep = buildRushPublishStep(definition, dryRun);
@@ -217,6 +265,8 @@ function runNpmRelease(
   if (dryRun) {
     return nextContainer;
   }
+
+  nextContainer = withGitPushAuth(nextContainer, gitPushAuth!);
 
   const pushStep = buildGitPushReleaseStep(definition);
   console.log(`[release-packages] Git command: ${pushStep.args.join(" ")}`);

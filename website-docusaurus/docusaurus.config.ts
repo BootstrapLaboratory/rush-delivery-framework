@@ -10,8 +10,9 @@ const baseUrl =
   process.env.PAGES_BASE_PATH ?? (isProjectPages ? `/${repositoryName}/` : "/");
 const url =
   process.env.PAGES_SITE_URL ?? "https://bootstraplaboratory.github.io";
-const currentDocsVersion = "v0.6.2";
+const currentDocsVersion = "v0.6.3";
 const archivedDocsVersions = [
+  "v0.6.2",
   "v0.6.1",
   "v0.6.0",
   "v0.5.0",
