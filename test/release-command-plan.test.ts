@@ -3,7 +3,7 @@ import { test } from "node:test";
 
 import type { NpmReleaseDefinition } from "../src/model/npm-release.ts";
 import {
-  buildGitPushReleaseStep,
+  buildNpmReleaseExecutionPlan,
   buildRushChangeVerifyStep,
   buildRushPublishStep,
 } from "../src/stages/release/release-command-plan.ts";
@@ -76,11 +76,22 @@ test("builds live Rush publish command with apply and publish flags", () => {
   });
 });
 
-test("builds release branch push command", () => {
-  assert.deepEqual(buildGitPushReleaseStep(releaseDefinition), {
-    args: ["push", "origin", "main", "--follow-tags"],
-    command: "git",
-  });
+test("configures Git push auth before live Rush publish", () => {
+  const plan = buildNpmReleaseExecutionPlan(releaseDefinition, false);
+
+  assert.deepEqual(
+    plan.map((step) => step.kind),
+    ["git-push-auth", "rush-publish"],
+  );
+});
+
+test("does not configure Git push auth during dry-run publish", () => {
+  const plan = buildNpmReleaseExecutionPlan(releaseDefinition, true);
+
+  assert.deepEqual(
+    plan.map((step) => step.kind),
+    ["rush-publish"],
+  );
 });
 
 test("keeps release Git auth env names out of Rush reserved namespace", () => {

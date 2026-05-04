@@ -1,4 +1,7 @@
-# GitHub Actions
+---
+title: "GitHub Actions"
+sidebar_label: "GitHub Actions"
+---
 
 The example repository uses GitHub Actions as a thin Rush Delivery adapter. The
 workflows do not calculate deploy plans or run Rush directly. They provide
@@ -14,7 +17,7 @@ permissions:
   packages: read
 
 steps:
-  - uses: BootstrapLaboratory/rush-delivery@v0.6.4
+  - uses: BootstrapLaboratory/rush-delivery@v0.6.3
     with:
       entrypoint: validate
       toolchain-image-provider: github
@@ -92,7 +95,7 @@ permissions:
   packages: write
 
 steps:
-  - uses: BootstrapLaboratory/rush-delivery@v0.6.4
+  - uses: BootstrapLaboratory/rush-delivery@v0.6.3
     with:
       entrypoint: release-packages
       dry-run: "false"
@@ -110,7 +113,7 @@ push the Rush-generated version commit back to the target branch.
 Pin Rush Delivery to a released tag:
 
 ```yaml
-uses: BootstrapLaboratory/rush-delivery@v0.6.4
+uses: BootstrapLaboratory/rush-delivery@v0.6.3
 ```
 
 Advance the tag intentionally when you want new behavior. Do not use an
@@ -126,4 +129,4 @@ unversioned branch in production CI.
 - Deploy env carries settings and secrets.
 - Manual force deploy workflows reuse the main workflow.
 
-Next: [Local Dry Runs](10-local-dry-runs.md).
+Next: [Local Dry Runs](../local-dry-runs).

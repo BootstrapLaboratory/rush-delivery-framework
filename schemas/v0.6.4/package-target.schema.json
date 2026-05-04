@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.4/package-target.schema.json",
+  "title": "Rush Delivery package target",
+  "type": "object",
+  "required": ["artifact", "name"],
+  "additionalProperties": false,
+  "properties": {
+    "artifact": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "path"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "directory"
+            },
+            "path": {
+              "$ref": "#/$defs/nonEmptyString"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "output", "project", "scenario"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "rush_deploy_archive"
+            },
+            "output": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "project": {
+              "$ref": "#/$defs/nonEmptyString"
+            },
+            "scenario": {
+              "$ref": "#/$defs/nonEmptyString"
+            }
+          }
+        }
+      ]
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dry_run_defaults": {
+          "$ref": "#/$defs/envMap"
+        },
+        "map_env": {
+          "$ref": "#/$defs/envNameMap"
+        },
+        "pass_env": {
+          "$ref": "#/$defs/envNameList"
+        }
+      }
+    },
+    "name": {
+      "$ref": "#/$defs/nonEmptyString"
+    }
+  },
+  "$defs": {
+    "envMap": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/envName"
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "envName": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "envNameList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/envName"
+      },
+      "uniqueItems": true
+    },
+    "envNameMap": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/envName"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/envName"
+      }
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

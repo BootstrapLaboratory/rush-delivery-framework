@@ -29,10 +29,7 @@ import {
   RELEASE_GIT_USERNAME_ENV,
 } from "./git-auth-env.ts";
 import { loadOptionalNpmReleaseMetadata } from "./load-release-metadata.ts";
-import {
-  buildGitPushReleaseStep,
-  buildRushPublishStep,
-} from "./release-command-plan.ts";
+import { buildNpmReleaseExecutionPlan } from "./release-command-plan.ts";
 
 export type ReleasePackagesInput = {
   dryRun?: boolean;
@@ -250,30 +247,31 @@ function runNpmRelease(
     hostEnv,
     dryRun,
   );
-  const publishStep = buildRushPublishStep(definition, dryRun);
 
-  console.log(
-    `[release-packages] Rush command: ${publishStep.args.slice(1).join(" ")}`,
-  );
-  nextContainer = nextContainer.withExec(
-    [publishStep.command, ...publishStep.args],
-    {
-      expand: false,
-    },
-  );
+  for (const step of buildNpmReleaseExecutionPlan(definition, dryRun)) {
+    switch (step.kind) {
+      case "git-push-auth": {
+        nextContainer = withGitPushAuth(nextContainer, gitPushAuth!);
+        break;
+      }
 
-  if (dryRun) {
-    return nextContainer;
+      case "rush-publish": {
+        const publishStep = step.commandStep;
+        console.log(
+          `[release-packages] Rush command: ${publishStep.args.slice(1).join(" ")}`,
+        );
+        nextContainer = nextContainer.withExec(
+          [publishStep.command, ...publishStep.args],
+          {
+            expand: false,
+          },
+        );
+        break;
+      }
+    }
   }
 
-  nextContainer = withGitPushAuth(nextContainer, gitPushAuth!);
-
-  const pushStep = buildGitPushReleaseStep(definition);
-  console.log(`[release-packages] Git command: ${pushStep.args.join(" ")}`);
-
-  return nextContainer.withExec([pushStep.command, ...pushStep.args], {
-    expand: false,
-  });
+  return nextContainer;
 }
 
 function releaseSummary(

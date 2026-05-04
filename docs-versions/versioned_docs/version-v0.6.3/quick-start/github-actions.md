@@ -1,4 +1,8 @@
-# GitHub Actions
+---
+title: "GitHub Actions"
+sidebar_label: "GitHub Actions"
+description: "Run Rush Delivery as a pinned GitHub Action."
+---
 
 Rush Delivery is a Dagger module for Rush-based release workflows. It owns the
 release path from source acquisition through detect, validate, build, package,
@@ -33,7 +37,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.4
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.3
         with:
           entrypoint: validate
           toolchain-image-provider: github
@@ -69,7 +73,7 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - name: Rush Delivery
-        uses: BootstrapLaboratory/rush-delivery@v0.6.4
+        uses: BootstrapLaboratory/rush-delivery@v0.6.3
         with:
           dry-run: "false"
           force-targets-json: ${{ inputs.force_targets_json || '[]' }}
@@ -90,7 +94,7 @@ jobs:
             ${{ steps.auth.outputs.credentials_file_path }}=>gcp-credentials.json
 ```
 
-Next, see [CI Using Command Line](ci-cli.md) if you want to call the module
+Next, see [CI Using Command Line](../ci-cli) if you want to call the module
 directly from a custom CI script.
 
 ## Package Release
@@ -104,7 +108,7 @@ permissions:
   packages: write
 
 steps:
-  - uses: BootstrapLaboratory/rush-delivery@v0.6.4
+  - uses: BootstrapLaboratory/rush-delivery@v0.6.3
     with:
       entrypoint: release-packages
       dry-run: "false"
@@ -114,4 +118,4 @@ steps:
         NPM_TOKEN=${{ secrets.NPM_TOKEN }}
 ```
 
-For the broader docs map, start from the [Introduction](../README.md).
+For the broader docs map, start from the [Introduction](../../introduction).

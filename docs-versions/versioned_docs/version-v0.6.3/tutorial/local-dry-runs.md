@@ -1,4 +1,7 @@
-# Local Dry Runs
+---
+title: "Local Dry Runs"
+sidebar_label: "Local Dry Runs"
+---
 
 CI should usually use Git source mode. Local development often needs a different
 path because your latest changes may not be pushed yet. For that, pass the
@@ -9,7 +12,7 @@ working tree with `--repo=.` and use `source-mode=local_copy`.
 Run the full workflow without publishing provider artifacts or deploying:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.4 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.3 call workflow \
   --repo=. \
   --git-sha="$(git rev-parse HEAD)" \
   --event-name=manual \
@@ -29,7 +32,7 @@ and safe. They do not need GHCR permissions.
 To exercise one target, force it:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.4 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.3 call workflow \
   --repo=. \
   --git-sha="$(git rev-parse HEAD)" \
   --event-name=manual \
@@ -47,7 +50,7 @@ runtime env.
 To validate local changes against your main branch:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.4 call validate \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.3 call validate \
   --repo=. \
   --event-name=pull_request \
   --pr-base-sha="$(git merge-base HEAD origin/main)" \
@@ -70,4 +73,4 @@ provider metadata, GHCR access, or cache behavior.
 - Use provider-off settings first.
 - Use forced targets to shorten feedback loops.
 
-Next: [Adapt To Your Project](11-adapting-to-your-project.md).
+Next: [Adapt To Your Project](../adapting-to-your-project).

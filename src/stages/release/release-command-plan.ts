@@ -7,6 +7,15 @@ export type ReleaseCommandStep = {
   command: "git" | "node";
 };
 
+export type ReleaseExecutionStep =
+  | {
+      kind: "git-push-auth";
+    }
+  | {
+      commandStep: ReleaseCommandStep;
+      kind: "rush-publish";
+    };
+
 export function buildRushChangeVerifyStep(
   definition: NpmReleaseDefinition,
 ): ReleaseCommandStep {
@@ -55,16 +64,28 @@ export function buildRushPublishStep(
   };
 }
 
-export function buildGitPushReleaseStep(
+export function buildNpmReleaseExecutionPlan(
   definition: NpmReleaseDefinition,
-): ReleaseCommandStep {
-  return {
-    args: [
-      "push",
-      "origin",
-      definition.versioning.target_branch,
-      "--follow-tags",
-    ],
-    command: "git",
-  };
+  dryRun: boolean,
+): ReleaseExecutionStep[] {
+  const publishStep = buildRushPublishStep(definition, dryRun);
+
+  if (dryRun) {
+    return [
+      {
+        commandStep: publishStep,
+        kind: "rush-publish",
+      },
+    ];
+  }
+
+  return [
+    {
+      kind: "git-push-auth",
+    },
+    {
+      commandStep: publishStep,
+      kind: "rush-publish",
+    },
+  ];
 }
