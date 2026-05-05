@@ -12,6 +12,10 @@ export type ReleaseExecutionStep =
       kind: "git-push-auth";
     }
   | {
+      targetBranch: string;
+      kind: "git-target-branch";
+    }
+  | {
       commandStep: ReleaseCommandStep;
       kind: "rush-publish";
     };
@@ -82,6 +86,10 @@ export function buildNpmReleaseExecutionPlan(
   return [
     {
       kind: "git-push-auth",
+    },
+    {
+      kind: "git-target-branch",
+      targetBranch: definition.versioning.target_branch,
     },
     {
       commandStep: publishStep,

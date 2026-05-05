@@ -1,4 +1,8 @@
-# Workflow Guide
+---
+id: "workflows"
+title: "Workflow Guide"
+sidebar_label: "Workflow Guide"
+---
 
 ## Local Framework Check
 
@@ -39,7 +43,7 @@ For GitHub Actions, prefer the repository action wrapper:
 
 ```yaml
 - name: Rush Delivery
-  uses: BootstrapLaboratory/rush-delivery@v0.6.6
+  uses: BootstrapLaboratory/rush-delivery@v0.6.5
   with:
     force-targets-json: ${{ inputs.force_targets_json || '[]' }}
     environment: prod
@@ -50,7 +54,7 @@ For GitHub Actions, prefer the repository action wrapper:
       GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
 ```
 
-See [GitHub Action usage](github-actions.md) for the complete production shape.
+See [GitHub Action usage](../github-action) for the complete production shape.
 
 For pull-request validation, use the same action with the `validate`
 entrypoint. The action defaults provider policies to `pull-or-build` for
@@ -59,7 +63,7 @@ change files:
 
 ```yaml
 - name: Rush Delivery validation
-  uses: BootstrapLaboratory/rush-delivery@v0.6.6
+  uses: BootstrapLaboratory/rush-delivery@v0.6.5
   with:
     entrypoint: validate
     toolchain-image-provider: github
@@ -71,7 +75,7 @@ the release flow is kept separate from deploy workflow composition:
 
 ```yaml
 - name: Rush Delivery package release
-  uses: BootstrapLaboratory/rush-delivery@v0.6.6
+  uses: BootstrapLaboratory/rush-delivery@v0.6.5
   with:
     entrypoint: release-packages
     dry-run: "false"
@@ -86,9 +90,6 @@ package release can push the Rush-generated version commit back to the target
 branch. The workflow job needs `contents: write`; it needs `packages: read` or
 `packages: write` only when using provider-backed Rush cache or toolchain
 images.
-Rush Delivery also prepares the release target branch locally before `rush
-publish`, because Rush checks out that branch for the final version-commit
-merge.
 
 NPM provenance defaults to `false` in `.dagger/release/npm.yaml`. Opt in only
 when npm can detect a supported provenance provider from inside the Dagger

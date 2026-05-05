@@ -1,4 +1,8 @@
-# CI Using Command Line
+---
+title: "CI Using Command Line"
+sidebar_label: "CI Using Command Line"
+description: "Call the Rush Delivery Dagger module directly from CI scripts."
+---
 
 Use the raw Dagger command when your CI provider is not GitHub Actions, or when
 you want to own all surrounding shell steps yourself.
@@ -9,7 +13,7 @@ need to mount the repository into the module.
 For pull-request validation:
 
 ```sh
-RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.6
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.5
 DEPLOY_ENV_FILE="${RUNNER_TEMP}/dagger-validate.env"
 SOURCE_REPOSITORY_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
 
@@ -45,7 +49,7 @@ files.
 For release workflow runs:
 
 ```sh
-RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.6
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.5
 RUNTIME_FILES_DIR="${RUNNER_TEMP}/rush-delivery-runtime-files"
 DEPLOY_ENV_FILE="${RUNNER_TEMP}/dagger-deploy.env"
 SOURCE_REPOSITORY_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
@@ -84,7 +88,7 @@ dagger -m "${RUSH_DELIVERY_MODULE}" call workflow \
 For package release/versioning:
 
 ```sh
-RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.6
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.5
 RELEASE_ENV_FILE="${RUNNER_TEMP}/dagger-release.env"
 SOURCE_REPOSITORY_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
 
@@ -105,7 +109,7 @@ dagger -m "${RUSH_DELIVERY_MODULE}" call release-packages \
   --source-auth-token-env=GITHUB_TOKEN
 ```
 
-Use [Local Runs](local-run.md) when you need to test changes that have not been
+Use [Local Runs](../local-run) when you need to test changes that have not been
 pushed to the remote repository yet.
 
-For all callable module inputs, see the [Public Dagger API](../api.md).
+For all callable module inputs, see the [Public Dagger API](../../api).

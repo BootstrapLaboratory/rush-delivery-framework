@@ -1,4 +1,9 @@
-# GitHub Action Usage
+---
+id: "github-action"
+title: "GitHub Action"
+sidebar_label: "GitHub Action"
+description: "Use Rush Delivery directly from GitHub Actions."
+---
 
 Rush Delivery can be used as a GitHub Action or as a raw Dagger module. The
 GitHub Action is a thin adapter over the module's Dagger functions, so release
@@ -28,7 +33,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.6
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.5
         with:
           entrypoint: validate
           toolchain-image-provider: github
@@ -52,7 +57,7 @@ steps:
     with:
       fetch-depth: 0
 
-  - uses: BootstrapLaboratory/rush-delivery@v0.6.6
+  - uses: BootstrapLaboratory/rush-delivery@v0.6.5
     with:
       entrypoint: validate
       repo: .
@@ -76,7 +81,7 @@ steps:
       service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
   - name: Rush Delivery
-    uses: BootstrapLaboratory/rush-delivery@v0.6.6
+    uses: BootstrapLaboratory/rush-delivery@v0.6.5
     with:
       force-targets-json: ${{ inputs.force_targets_json || '[]' }}
       deploy-tag-prefix: ${{ env.DEPLOY_TAG_PREFIX }}
@@ -130,7 +135,7 @@ jobs:
   release-packages:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.6
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.5
         with:
           entrypoint: release-packages
           dry-run: "false"
@@ -143,9 +148,7 @@ jobs:
 The package release entrypoint uses Git source mode by default, runs the shared
 Rush lifecycle in build-first order (`build`, `lint`, `test`, `verify`), lets
 Rush apply change files, publishes packages, and pushes the generated version
-commit to the metadata `target_branch`. It prepares that target branch locally
-before invoking `rush publish`, which lets Rush check it out for the final
-merge.
+commit to the metadata `target_branch`.
 
 NPM provenance is disabled by default. Keep `publish.provenance` omitted or set
 to `false` unless the release runtime is explicitly configured so npm can
@@ -186,7 +189,7 @@ The action mode does not replace raw Dagger usage. Local runs, other CI
 providers, and lower-level debugging can still call the module directly:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.6 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.5 call workflow \
   --git-sha="$GITHUB_SHA" \
   --source-mode=git \
   --source-repository-url="$SOURCE_REPOSITORY_URL" \

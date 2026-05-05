@@ -76,12 +76,24 @@ test("builds live Rush publish command with apply and publish flags", () => {
   });
 });
 
-test("configures Git push auth before live Rush publish", () => {
+test("prepares live Git release state before Rush publish", () => {
   const plan = buildNpmReleaseExecutionPlan(releaseDefinition, false);
 
   assert.deepEqual(
     plan.map((step) => step.kind),
-    ["git-push-auth", "rush-publish"],
+    ["git-push-auth", "git-target-branch", "rush-publish"],
+  );
+});
+
+test("uses the release target branch for live Git branch preparation", () => {
+  const plan = buildNpmReleaseExecutionPlan(releaseDefinition, false);
+
+  assert.deepEqual(
+    plan.find((step) => step.kind === "git-target-branch"),
+    {
+      kind: "git-target-branch",
+      targetBranch: "main",
+    },
   );
 });
 

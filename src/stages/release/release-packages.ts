@@ -25,6 +25,7 @@ import { logSection } from "../../logging/sections.ts";
 import { parseDeployEnvFile } from "../deploy/runtime-env.ts";
 import {
   RELEASE_GIT_REPOSITORY_URL_ENV,
+  RELEASE_GIT_TARGET_BRANCH_ENV,
   RELEASE_GIT_TOKEN_ENV,
   RELEASE_GIT_USERNAME_ENV,
 } from "./git-auth-env.ts";
@@ -198,6 +199,28 @@ function withGitPushAuth(container: Container, auth: GitPushAuth): Container {
     );
 }
 
+function withGitTargetBranch(
+  container: Container,
+  targetBranch: string,
+): Container {
+  return container
+    .withEnvVariable(RELEASE_GIT_TARGET_BRANCH_ENV, targetBranch)
+    .withExec(
+      [
+        "bash",
+        "-lc",
+        [
+          `target="\${${RELEASE_GIT_TARGET_BRANCH_ENV}}"`,
+          'git fetch origin "+refs/heads/${target}:refs/remotes/origin/${target}"',
+          'if git show-ref --verify --quiet "refs/heads/${target}"; then git branch --set-upstream-to="origin/${target}" "${target}"; else git branch --track "${target}" "origin/${target}"; fi',
+        ].join(" && "),
+      ],
+      {
+        expand: false,
+      },
+    );
+}
+
 function prepareNpmReleaseContainer(
   container: Container,
   definition: NpmReleaseDefinition,
@@ -252,6 +275,11 @@ function runNpmRelease(
     switch (step.kind) {
       case "git-push-auth": {
         nextContainer = withGitPushAuth(nextContainer, gitPushAuth!);
+        break;
+      }
+
+      case "git-target-branch": {
+        nextContainer = withGitTargetBranch(nextContainer, step.targetBranch);
         break;
       }
 

@@ -1,4 +1,8 @@
-# Entrypoints Reference
+---
+id: "entrypoints"
+title: "Entrypoints"
+sidebar_label: "Entrypoints"
+---
 
 When consuming this module from CI, prefer Git source mode so Dagger clones the
 Rush repository internally:
@@ -67,9 +71,7 @@ strategy is npm publishing through Rush change files.
 Use it for standalone package release workflows. The entrypoint runs the
 shared Rush lifecycle in build-first order (`build`, `lint`, `test`, `verify`),
 lets Rush apply change files, publishes packages, and pushes the generated
-version commit. For live releases, Rush Delivery prepares the metadata target
-branch locally before `rush publish` so Rush can check it out for the final
-merge. It does not touch deploy tags.
+version commit. It does not touch deploy tags.
 
 NPM provenance defaults to `false`; opt in from `.dagger/release/npm.yaml` only
 when the release runtime is wired for supported npm provenance detection.
