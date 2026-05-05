@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://bootstraplaboratory.github.io/rush-delivery/schemas/npm-release.schema.json",
+  "$id": "https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.5/npm-release.schema.json",
   "title": "Rush Delivery NPM release",
   "type": "object",
   "required": ["auth", "kind", "versioning"],

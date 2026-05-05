@@ -14,6 +14,7 @@ const githubBlobBase =
   "https://github.com/BootstrapLaboratory/rush-delivery/blob";
 
 const publishedVersions = [
+  "v0.6.4",
   "v0.6.3",
   "v0.6.2",
   "v0.6.1",

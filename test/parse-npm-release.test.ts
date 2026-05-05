@@ -64,6 +64,33 @@ test("defaults optional NPM release publish options", () => {
   );
 });
 
+test("defaults NPM release provenance to false when publish block exists", () => {
+  assert.deepEqual(
+    parseNpmRelease(
+      [
+        "kind: npm",
+        "versioning:",
+        "  strategy: rush-change-files",
+        "  target_branch: main",
+        "auth:",
+        "  kind: token",
+        "  token_env: NPM_TOKEN",
+        "publish:",
+        "  registry: https://registry.npmjs.org/",
+        "  tag: latest",
+        "  access: public",
+        "",
+      ].join("\n"),
+    ).publish,
+    {
+      access: "public",
+      provenance: false,
+      registry: "https://registry.npmjs.org/",
+      tag: "latest",
+    },
+  );
+});
+
 test("rejects unsupported NPM release versioning strategy", () => {
   assert.throws(
     () =>
