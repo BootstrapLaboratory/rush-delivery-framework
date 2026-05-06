@@ -5,7 +5,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD bash -lc 'true'
 
-ARG DAGGER_VERSION=0.20.6
+ARG DAGGER_VERSION=0.20.7
 
 # trunk-ignore(hadolint/DL3008)
 RUN apt-get update \

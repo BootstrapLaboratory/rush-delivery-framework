@@ -29,7 +29,7 @@ jobs:
       contents: write
     steps:
       - name: Run Rush Delivery package release
-        uses: BootstrapLaboratory/rush-delivery@v0.6.6
+        uses: BootstrapLaboratory/rush-delivery@v0.6.7
         with:
           entrypoint: release-packages
           dry-run: "false"
@@ -76,7 +76,7 @@ permissions:
   packages: read
 
 steps:
-  - uses: BootstrapLaboratory/rush-delivery@v0.6.6
+  - uses: BootstrapLaboratory/rush-delivery@v0.6.7
     with:
       entrypoint: validate
       toolchain-image-provider: github
@@ -92,7 +92,7 @@ cache from PRs. Package release credentials are not passed to PR validation.
 Use local-copy source mode to test metadata and release behavior before pushing:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.6 call release-packages \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call release-packages \
   --repo=. \
   --git-sha="$(git rev-parse HEAD)" \
   --dry-run=true \

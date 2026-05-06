@@ -95,7 +95,7 @@ The package release example is
 [BootstrapLaboratory/labkit](https://github.com/BootstrapLaboratory/labkit). It
 has a package-only Rush monorepo with public npm packages, Rush version
 policies, package `publishConfig`, `.npmrc-publish`, and a
-`release-packages` workflow using Rush Delivery `v0.6.6`.
+`release-packages` workflow using Rush Delivery `v0.6.7`.
 
 Use LabKit as the reference for npm publishing shape. Copy the release
 contracts from it, but adapt package names, version policy names, registry,

@@ -5,7 +5,7 @@ available to Dagger and avoids relying on a remote Git ref that does not contain
 your latest changes.
 
 ```sh
-RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.6
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.6.7
 
 dagger -m "${RUSH_DELIVERY_MODULE}" call workflow \
   --repo=. \

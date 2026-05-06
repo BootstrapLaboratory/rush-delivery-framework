@@ -1,4 +1,8 @@
-# GitHub Actions
+---
+title: "GitHub Actions"
+sidebar_label: "GitHub Actions"
+description: "Run Rush Delivery as a pinned GitHub Action."
+---
 
 Rush Delivery is a Dagger module for Rush-based release workflows. It owns the
 release path from source acquisition through detect, validate, build, package,
@@ -33,7 +37,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.7
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.6
         with:
           entrypoint: validate
           toolchain-image-provider: github
@@ -69,7 +73,7 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - name: Rush Delivery
-        uses: BootstrapLaboratory/rush-delivery@v0.6.7
+        uses: BootstrapLaboratory/rush-delivery@v0.6.6
         with:
           dry-run: "false"
           force-targets-json: ${{ inputs.force_targets_json || '[]' }}
@@ -90,7 +94,7 @@ jobs:
             ${{ steps.auth.outputs.credentials_file_path }}=>gcp-credentials.json
 ```
 
-Next, see [CI Using Command Line](ci-cli.md) if you want to call the module
+Next, see [CI Using Command Line](../ci-cli) if you want to call the module
 directly from a custom CI script.
 
 ## Package Release
@@ -101,36 +105,20 @@ credentials in `release-env`; deploy credentials stay in `deploy-env`.
 NPM provenance is disabled by default; opt in from `.dagger/release/npm.yaml`
 only when the Dagger release runtime is configured for supported npm provenance.
 
-This is the minimal package-only shape. It publishes to npmjs through Rush and
-does not use GHCR-backed provider artifacts:
-
 ```yaml
 permissions:
-  contents: read
+  contents: write
+  packages: write
 
-jobs:
-  release-packages:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.7
-        with:
-          entrypoint: release-packages
-          dry-run: "false"
-          toolchain-image-provider: off
-          rush-cache-provider: off
-          release-env: |
-            NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+steps:
+  - uses: BootstrapLaboratory/rush-delivery@v0.6.6
+    with:
+      entrypoint: release-packages
+      dry-run: "false"
+      toolchain-image-provider: github
+      rush-cache-provider: github
+      release-env: |
+        NPM_TOKEN=${{ secrets.NPM_TOKEN }}
 ```
 
-Use provider `github` and add `packages` permissions only when the repository
-has Rush Delivery provider metadata for toolchain images or Rush install cache.
-
-Rush Delivery expects normal Rush release inputs in the repository:
-`.dagger/release/npm.yaml`, `common/config/rush/.npmrc-publish`, Rush change
-files, package `publishConfig`, and any Rush version policies referenced from
-`rush.json`.
-
-For the broader docs map, start from the [Introduction](../README.md).
+For the broader docs map, start from the [Introduction](../../introduction).

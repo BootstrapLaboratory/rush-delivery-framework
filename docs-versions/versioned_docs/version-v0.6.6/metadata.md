@@ -1,20 +1,24 @@
-# Metadata Contracts
+---
+id: "metadata"
+title: "Metadata"
+sidebar_label: "Metadata"
+---
 
 Project-specific behavior lives under `.dagger` in the caller's Rush
 repository. This module treats those files as the public extension contract.
 
 Exact field validation is defined by JSON schemas under
-[`../schemas`](../schemas).
+[`../schemas`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/schemas).
 
 For editor integration in external projects, prefer exact versioned schema
 URLs. For example:
 
 ```yaml
-# yaml-language-server: $schema=https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.7/deploy-target.schema.json
+# yaml-language-server: $schema=https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.6/deploy-target.schema.json
 ```
 
 The root `https://bootstraplaboratory.github.io/rush-delivery/schemas/` URLs
-track the current release. Exact paths such as `/schemas/v0.6.7/...` are the
+track the current release. Exact paths such as `/schemas/v0.6.6/...` are the
 stable contract for projects pinned to that Rush Delivery version.
 
 ## Package Release
@@ -32,7 +36,7 @@ source of truth for package selection, version changes, changelogs, and
 publishable package rules.
 
 ```yaml
-# yaml-language-server: $schema=https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.7/npm-release.schema.json
+# yaml-language-server: $schema=https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.6/npm-release.schema.json
 
 kind: npm
 
@@ -48,22 +52,7 @@ publish:
   registry: https://registry.npmjs.org/
   tag: latest
   access: public
-  provenance: false
 ```
-
-Fields:
-
-- `kind`: currently `npm`.
-- `versioning.strategy`: currently `rush-change-files`.
-- `versioning.target_branch`: branch Rush publishes the generated version
-  commit back to, usually `main`.
-- `auth.kind`: currently `token`.
-- `auth.token_env`: release env key containing the npm token, usually
-  `NPM_TOKEN`.
-- `publish.registry`: optional npm registry URL passed to `rush publish`.
-- `publish.tag`: npm dist-tag, defaulting to `latest`.
-- `publish.access`: optional npm access level, `public` or `restricted`.
-- `publish.provenance`: optional boolean, defaulting to `false`.
 
 For token auth, keep the npm token in the release env file and reference it
 from `common/config/rush/.npmrc-publish`, for example:
@@ -71,45 +60,6 @@ from `common/config/rush/.npmrc-publish`, for example:
 ```text
 //registry.npmjs.org/:_authToken=${NPM_TOKEN}
 ```
-
-The repository still owns Rush and npm package policy. For example, LabKit uses
-a Rush version policy:
-
-```json
-[
-  {
-    "definitionName": "individualVersion",
-    "policyName": "labkit"
-  }
-]
-```
-
-and each publishable Rush project references it from `rush.json`:
-
-```json
-{
-  "packageName": "@omgjs/labkit-webapp-ui",
-  "projectFolder": "packages/webapp-ui",
-  "versionPolicyName": "labkit"
-}
-```
-
-Package-level npm metadata remains package-owned:
-
-```json
-{
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  },
-  "files": ["dist/**/*", "README.md"]
-}
-```
-
-Private tooling packages can stay in the Rush repo for build and lint support
-without becoming part of the public release contract. Rush and npm decide what
-is publishable from package metadata and Rush publish behavior; Rush Delivery
-does not maintain a separate package allowlist.
 
 `publish.provenance` defaults to `false`. Keep it omitted or set to `false`
 for the default Dagger-contained release flow, because npm automatic provenance
@@ -126,7 +76,7 @@ target branch locally before invoking `rush publish` so Rush can check it out
 for the final merge.
 
 Schema:
-[`../schemas/npm-release.schema.json`](../schemas/npm-release.schema.json)
+[`../schemas/npm-release.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/schemas/npm-release.schema.json)
 
 ## Deploy Services Mesh
 
@@ -137,7 +87,7 @@ Schema:
 - Service names must match deploy target metadata names.
 
 Schema:
-[`../schemas/deploy-services-mesh.schema.json`](../schemas/deploy-services-mesh.schema.json)
+[`../schemas/deploy-services-mesh.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/schemas/deploy-services-mesh.schema.json)
 
 ## Deploy Targets
 
@@ -199,7 +149,7 @@ output name with different values, Rush Delivery fails instead of silently
 overriding one value with another.
 
 Schema:
-[`../schemas/deploy-target.schema.json`](../schemas/deploy-target.schema.json)
+[`../schemas/deploy-target.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/schemas/deploy-target.schema.json)
 
 ## Package Targets
 
@@ -241,7 +191,7 @@ Supported artifact types:
 - `rush_deploy_archive`: a Rush deploy output packaged for a deploy target.
 
 Schema:
-[`../schemas/package-target.schema.json`](../schemas/package-target.schema.json)
+[`../schemas/package-target.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/schemas/package-target.schema.json)
 
 ## Validation Targets
 
@@ -251,7 +201,7 @@ They declare optional backing services and ordered validation steps. This keeps
 target-specific smoke checks in metadata while the runner stays generic.
 
 Schema:
-[`../schemas/validation-target.schema.json`](../schemas/validation-target.schema.json)
+[`../schemas/validation-target.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/schemas/validation-target.schema.json)
 
 ## Toolchain Images
 
@@ -263,7 +213,7 @@ Provider `off` needs no metadata. Provider `github` uses GHCR with environment
 keys for repository, username, and token.
 
 Schema:
-[`../schemas/toolchain-image-providers.schema.json`](../schemas/toolchain-image-providers.schema.json)
+[`../schemas/toolchain-image-providers.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/schemas/toolchain-image-providers.schema.json)
 
 ## Rush Cache
 
@@ -279,4 +229,4 @@ The `cache` section defines:
 The `providers` section declares optional storage adapters.
 
 Schema:
-[`../schemas/rush-cache-providers.schema.json`](../schemas/rush-cache-providers.schema.json)
+[`../schemas/rush-cache-providers.schema.json`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/schemas/rush-cache-providers.schema.json)

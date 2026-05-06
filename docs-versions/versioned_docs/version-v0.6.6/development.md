@@ -1,7 +1,12 @@
-# Development
+---
+id: "development"
+title: "Development"
+sidebar_label: "Development"
+description: "Maintain this repository and generated documentation."
+---
 
 This page is for maintaining the Rush Delivery repository itself. User-facing
-setup lives in the [Quick Start](quick-start/github-actions.md).
+setup lives in the [Quick Start](../quick-start/github-actions).
 
 ## Local Checks
 
@@ -21,16 +26,16 @@ npm test
 ## Website Checks
 
 The public GitHub Pages site currently builds from
-[`../website-docusaurus`](../website-docusaurus). It uses Docusaurus, generates
+[`../website-docusaurus`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/website-docusaurus). It uses Docusaurus, generates
 docs pages from `website-docusaurus/docs-tree.yaml`, and is deployed by
-[`../.github/workflows/pages.yml`](../.github/workflows/pages.yml).
+[`../.github/workflows/pages.yml`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/.github/workflows/pages.yml).
 
 ```sh
 npm run site:docusaurus:check
 npm run site:docusaurus:build
 ```
 
-The Astro + Starlight comparison site remains under [`../website`](../website).
+The Astro + Starlight comparison site remains under [`../website`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/website).
 
 ```sh
 npm run site:check
@@ -39,16 +44,16 @@ npm run site:build
 
 ## Generated Site Inputs
 
-The root [`docs`](.) directory is the source of truth for generated website
+The root [`docs`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/docs) directory is the source of truth for generated website
 docs. When adding or renaming public docs pages, update both:
 
-- [`../website-docusaurus/docs-tree.yaml`](../website-docusaurus/docs-tree.yaml)
-- [`../website/docs-tree.yaml`](../website/docs-tree.yaml)
+- [`../website-docusaurus/docs-tree.yaml`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/website-docusaurus/docs-tree.yaml)
+- [`../website/docs-tree.yaml`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/website/docs-tree.yaml)
 
-Schemas under [`../schemas`](../schemas) are copied into the static site during
+Schemas under [`../schemas`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/schemas) are copied into the static site during
 website builds and are published under `/rush-delivery/schemas/`. Exact release
 schemas also live under versioned subdirectories such as
-`/rush-delivery/schemas/v0.6.7/`.
+`/rush-delivery/schemas/v0.6.6/`.
 
 When releasing a version that changes schema behavior, keep the versioned
 schema directory immutable and update the root schemas to the current release
@@ -57,21 +62,21 @@ shape.
 ## Versioned Docusaurus Docs
 
 Docusaurus is the canonical versioned documentation site. The current editable
-docs stay in [`docs`](.), while released snapshots are committed under
-[`../docs-versions`](../docs-versions).
+docs stay in [`docs`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/docs), while released snapshots are committed under
+[`../docs-versions`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/docs-versions).
 
 Docusaurus expects `versions.json`, `versioned_docs`, and `versioned_sidebars`
 inside the website directory, so
-[`../website-docusaurus/scripts/sync-versioned-inputs.mjs`](../website-docusaurus/scripts/sync-versioned-inputs.mjs)
+[`../website-docusaurus/scripts/sync-versioned-inputs.mjs`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/website-docusaurus/scripts/sync-versioned-inputs.mjs)
 copies the canonical root snapshots into Docusaurus-local generated inputs
 before `start`, `build`, and `check`.
 
 After a docs-bearing release:
 
 1. Update the current docs version in
-   [`../website-docusaurus/docusaurus.config.ts`](../website-docusaurus/docusaurus.config.ts).
+   [`../website-docusaurus/docusaurus.config.ts`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/website-docusaurus/docusaurus.config.ts).
 2. Add the previous current version to `publishedVersions` in
-   [`../website-docusaurus/scripts/sync-versioned-docs.mjs`](../website-docusaurus/scripts/sync-versioned-docs.mjs)
+   [`../website-docusaurus/scripts/sync-versioned-docs.mjs`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/website-docusaurus/scripts/sync-versioned-docs.mjs)
    when the release changed public docs.
 3. Run:
 
@@ -84,7 +89,7 @@ After a docs-bearing release:
 4. Confirm the generated versioned docs and sidebars match the released tag.
 
 When preparing documentation for the next release line, snapshot the latest
-released documentation before editing root [`docs`](.). In practice, finish and
+released documentation before editing root [`docs`](https://github.com/BootstrapLaboratory/rush-delivery/blob/v0.6.6/docs). In practice, finish and
 tag the release, run the versioned docs sync so `docs-versions` contains a
 directory for that released tag, and only then update current docs for the next
 version. This keeps published docs stable for users pinned to older module

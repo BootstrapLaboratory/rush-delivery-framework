@@ -1,4 +1,7 @@
-# Adapt To Your Project
+---
+title: "Adapt To Your Project"
+sidebar_label: "Adapt To Your Project"
+---
 
 The example repository is intentionally concrete, but your project does not
 need to copy its cloud providers or application stack. Copy the contracts and
@@ -99,28 +102,20 @@ Deploy scripts depending on the whole repo:
 - Prefer narrow runtime workspaces.
 - Add only the dirs and files the script truly needs.
 
-Package release mixed into deploy metadata:
-
-- Keep npm package release in `.dagger/release/npm.yaml`.
-- Keep deploy targets in `.dagger/deploy` and `.dagger/package`.
-- Use `release-env` for npm credentials and `deploy-env` for deploy/build
-  inputs.
-
 ## Final Checklist
 
 - Rush projects are stable and buildable.
 - Rush commands cover validation and build.
 - `.dagger/package` defines deploy artifacts and any build-time env allowlists.
 - `.dagger/deploy` defines deploy ordering and runtime behavior.
-- `.dagger/release` defines npm package release behavior when the repository
-  publishes packages.
 - `.dagger/validate` defines only orchestration-heavy checks.
 - Provider metadata is configured.
 - PR and release workflows use different permissions and policies.
 - Local dry-runs work before live deployment.
 
-Next: [NPM Package Release Baseline](12-npm-package-release-baseline.md).
+From here, use the [Metadata](../../metadata) and [Provider Adapters](../../providers)
+references when you need exact schema details.
 
 For editor validation, point metadata files at exact published schema versions
 such as
-`https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.7/deploy-target.schema.json`.
+`https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.6/deploy-target.schema.json`.

@@ -28,6 +28,21 @@ Provider `off` should keep working for local development. Provider-specific
 credentials must be explicit and must not be required for dry-run paths unless a
 selected target truly needs them.
 
+## Dagger Engine Version Updates
+
+When changing [`../dagger.json`](../dagger.json) `engineVersion`, keep every
+developer runtime on the same Dagger version before validating the module.
+
+- Update the local Dagger CLI in the current environment to the matching
+  version. A module with `engineVersion: "vX.Y.Z"` is not validly tested by an
+  older `dagger` binary.
+- Update [`../.devcontainer/Dockerfile`](../.devcontainer/Dockerfile)
+  `ARG DAGGER_VERSION=` to the same version without the leading `v`, matching
+  the existing Dockerfile release URL format.
+- Confirm with `dagger version` before running Dagger checks.
+- Run at least a module load/call check and `dagger call self-check` after the
+  CLI and `engineVersion` agree.
+
 ## Preserve Stage Boundaries
 
 Detect decides what should run. Build creates compiled outputs. Package
@@ -66,6 +81,11 @@ version directory instead.
 When schema behavior changes, add a new `schemas/vX.Y.Z/` directory, update the
 root schemas to the current release shape, and update docs, tutorials, and
 website examples to reference the new version.
+
+When a release line needs exact version alignment for published docs or editor
+URLs, create a `schemas/vX.Y.Z/` snapshot even if schema behavior is unchanged.
+In that case, copy the current root schemas and update only their `$id` values
+to the versioned `/schemas/vX.Y.Z/...` URLs.
 
 Exact published schema URLs are the recommended editor contract for downstream
 projects, for example

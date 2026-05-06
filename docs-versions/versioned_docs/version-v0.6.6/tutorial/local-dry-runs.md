@@ -1,4 +1,7 @@
-# Local Dry Runs
+---
+title: "Local Dry Runs"
+sidebar_label: "Local Dry Runs"
+---
 
 CI should usually use Git source mode. Local development often needs a different
 path because your latest changes may not be pushed yet. For that, pass the
@@ -9,7 +12,7 @@ working tree with `--repo=.` and use `source-mode=local_copy`.
 Run the full workflow without publishing provider artifacts or deploying:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.6 call workflow \
   --repo=. \
   --git-sha="$(git rev-parse HEAD)" \
   --event-name=manual \
@@ -29,7 +32,7 @@ and safe. They do not need GHCR permissions.
 To exercise one target, force it:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.6 call workflow \
   --repo=. \
   --git-sha="$(git rev-parse HEAD)" \
   --event-name=manual \
@@ -47,7 +50,7 @@ runtime env.
 To validate local changes against your main branch:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call validate \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.6 call validate \
   --repo=. \
   --event-name=pull_request \
   --pr-base-sha="$(git merge-base HEAD origin/main)" \
@@ -55,24 +58,6 @@ dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call validate \
 ```
 
 This is useful before opening a PR or when debugging validation target metadata.
-
-## Package Release Dry Run
-
-To test npm release metadata and Rush publish planning without publishing:
-
-```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call release-packages \
-  --repo=. \
-  --git-sha="$(git rev-parse HEAD)" \
-  --dry-run=true \
-  --toolchain-image-provider=off \
-  --rush-cache-provider=off \
-  --source-mode=local_copy
-```
-
-This path reads `.dagger/release/npm.yaml` and runs the release build
-lifecycle. It does not require `NPM_TOKEN`, does not push a version commit, and
-does not publish packages.
 
 ## When To Use Provider-Backed Local Runs
 
@@ -85,9 +70,7 @@ provider metadata, GHCR access, or cache behavior.
 - Use `--repo=.` for unpushed changes.
 - Use `--source-mode=local_copy` with local runs.
 - Use `--dry-run=true` while developing deploy metadata.
-- Use `release-packages --dry-run=true` while developing package release
-  metadata.
 - Use provider-off settings first.
 - Use forced targets to shorten feedback loops.
 
-Next: [Adapt To Your Project](11-adapting-to-your-project.md).
+Next: [Adapt To Your Project](../adapting-to-your-project).

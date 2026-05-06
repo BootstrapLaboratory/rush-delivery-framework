@@ -32,7 +32,7 @@ contract. These docs explain intent and usage; schemas define file shape.
 Published schemas are available from the documentation site:
 
 - `https://bootstraplaboratory.github.io/rush-delivery/schemas/<schema>.schema.json`
-- `https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.6/<schema>.schema.json`
+- `https://bootstraplaboratory.github.io/rush-delivery/schemas/v0.6.7/<schema>.schema.json`
 
 Use exact versioned schema URLs in project metadata editor hints so older
 projects keep the schema contract they were written against. The root
@@ -43,5 +43,5 @@ projects keep the schema contract they were written against. The root
 The package release docs use
 [BootstrapLaboratory/labkit](https://github.com/BootstrapLaboratory/labkit) as a
 real npm package publishing reference. LabKit publishes public npm packages with
-Rush Delivery `v0.6.6`, Rush change files, `.dagger/release/npm.yaml`, and a
+Rush Delivery `v0.6.7`, Rush change files, `.dagger/release/npm.yaml`, and a
 dedicated `release-packages` GitHub workflow.

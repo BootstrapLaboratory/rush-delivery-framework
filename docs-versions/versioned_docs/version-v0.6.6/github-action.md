@@ -1,4 +1,9 @@
-# GitHub Action Usage
+---
+id: "github-action"
+title: "GitHub Action"
+sidebar_label: "GitHub Action"
+description: "Use Rush Delivery directly from GitHub Actions."
+---
 
 Rush Delivery can be used as a GitHub Action or as a raw Dagger module. The
 GitHub Action is a thin adapter over the module's Dagger functions, so release
@@ -28,7 +33,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.7
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.6
         with:
           entrypoint: validate
           toolchain-image-provider: github
@@ -52,7 +57,7 @@ steps:
     with:
       fetch-depth: 0
 
-  - uses: BootstrapLaboratory/rush-delivery@v0.6.7
+  - uses: BootstrapLaboratory/rush-delivery@v0.6.6
     with:
       entrypoint: validate
       repo: .
@@ -76,7 +81,7 @@ steps:
       service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
   - name: Rush Delivery
-    uses: BootstrapLaboratory/rush-delivery@v0.6.7
+    uses: BootstrapLaboratory/rush-delivery@v0.6.6
     with:
       force-targets-json: ${{ inputs.force_targets_json || '[]' }}
       deploy-tag-prefix: ${{ env.DEPLOY_TAG_PREFIX }}
@@ -112,12 +117,7 @@ The action appends `GITHUB_ACTOR`, `GITHUB_REPOSITORY`, `GITHUB_API_URL`, and
 
 Use `entrypoint: release-packages` when a workflow should publish npm packages
 from `.dagger/release/npm.yaml`. Keep npm credentials in `release-env`, not
-`deploy-env`; package release credentials are separate from deploy credentials
-because npm publishing is a registry side effect, not a deploy target runtime.
-
-The smallest package-only workflow can keep provider adapters off. This is the
-shape used by package-only projects such as
-[LabKit](https://github.com/BootstrapLaboratory/labkit):
+`deploy-env`.
 
 ```yaml
 name: package-release
@@ -128,20 +128,19 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
+  packages: write
 
 jobs:
   release-packages:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.7
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.6
         with:
           entrypoint: release-packages
           dry-run: "false"
-          toolchain-image-provider: off
-          rush-cache-provider: off
+          toolchain-image-provider: github
+          rush-cache-provider: github
           release-env: |
             NPM_TOKEN=${{ secrets.NPM_TOKEN }}
 ```
@@ -152,25 +151,6 @@ Rush apply change files, publishes packages, and pushes the generated version
 commit to the metadata `target_branch`. It prepares that target branch locally
 before invoking `rush publish`, which lets Rush check it out for the final
 merge.
-
-`contents: write` is required for live releases because Rush writes a generated
-version commit and pushes it back to `versioning.target_branch`. The action
-adds `GITHUB_TOKEN` to the generated release env file by default, so the same
-token is used for source acquisition and the final push. Set
-`include-github-env: "false"` only when you provide an equivalent token yourself.
-
-`packages: write` is not required for npmjs publishing by itself. Add
-`packages: read` or `packages: write` only when `toolchain-image-provider` or
-`rush-cache-provider` uses `github`.
-
-The project still owns npm publish policy through Rush and npm files:
-
-- `common/config/rush/version-policies.json` and `rush.json` decide package
-  version policy names.
-- Rush change files decide the next version and changelog content.
-- Package `publishConfig`, `files`, entrypoints, and private/public package
-  settings decide what npm can publish.
-- `common/config/rush/.npmrc-publish` maps `NPM_TOKEN` into npm auth.
 
 NPM provenance is disabled by default. Keep `publish.provenance` omitted or set
 to `false` unless the release runtime is explicitly configured so npm can
@@ -211,7 +191,7 @@ The action mode does not replace raw Dagger usage. Local runs, other CI
 providers, and lower-level debugging can still call the module directly:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.6 call workflow \
   --git-sha="$GITHUB_SHA" \
   --source-mode=git \
   --source-repository-url="$SOURCE_REPOSITORY_URL" \

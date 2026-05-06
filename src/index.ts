@@ -1,3 +1,9 @@
+/**
+ * Rush Delivery is a Dagger module and GitHub Action for Rush-based release
+ * workflows. It owns the release path from source acquisition through detect,
+ * validate, build, package, package release, and deploy while keeping
+ * project-specific behavior in metadata.
+ */
 import {
   argument,
   Directory,
@@ -23,6 +29,9 @@ import {
 } from "./metadata/dagger-metadata-contract.ts";
 import { formatMetadataContractValidationResult } from "./metadata/metadata-contract.ts";
 
+/**
+ * Repeatable release workflows for Rush monorepos.
+ */
 @object()
 export class RushDelivery {
   /**
