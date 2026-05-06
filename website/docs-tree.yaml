@@ -78,3 +78,12 @@ tutorialItems:
   - title: Adapt To Your Project
     source: ../docs/tutorial/11-adapting-to-your-project.md
     slug: tutorial/adapting-to-your-project
+  - title: NPM Package Release Baseline
+    source: ../docs/tutorial/12-npm-package-release-baseline.md
+    slug: tutorial/npm-package-release-baseline
+  - title: Release Metadata
+    source: ../docs/tutorial/13-release-metadata.md
+    slug: tutorial/release-metadata
+  - title: Package Release Workflow
+    source: ../docs/tutorial/14-package-release-workflow.md
+    slug: tutorial/package-release-workflow

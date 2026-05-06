@@ -101,20 +101,36 @@ credentials in `release-env`; deploy credentials stay in `deploy-env`.
 NPM provenance is disabled by default; opt in from `.dagger/release/npm.yaml`
 only when the Dagger release runtime is configured for supported npm provenance.
 
+This is the minimal package-only shape. It publishes to npmjs through Rush and
+does not use GHCR-backed provider artifacts:
+
 ```yaml
 permissions:
-  contents: write
-  packages: write
+  contents: read
 
-steps:
-  - uses: BootstrapLaboratory/rush-delivery@v0.6.6
-    with:
-      entrypoint: release-packages
-      dry-run: "false"
-      toolchain-image-provider: github
-      rush-cache-provider: github
-      release-env: |
-        NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+jobs:
+  release-packages:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.6
+        with:
+          entrypoint: release-packages
+          dry-run: "false"
+          toolchain-image-provider: off
+          rush-cache-provider: off
+          release-env: |
+            NPM_TOKEN=${{ secrets.NPM_TOKEN }}
 ```
+
+Use provider `github` and add `packages` permissions only when the repository
+has Rush Delivery provider metadata for toolchain images or Rush install cache.
+
+Rush Delivery expects normal Rush release inputs in the repository:
+`.dagger/release/npm.yaml`, `common/config/rush/.npmrc-publish`, Rush change
+files, package `publishConfig`, and any Rush version policies referenced from
+`rush.json`.
 
 For the broader docs map, start from the [Introduction](../README.md).

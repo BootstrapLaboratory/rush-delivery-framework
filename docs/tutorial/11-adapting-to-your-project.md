@@ -99,19 +99,27 @@ Deploy scripts depending on the whole repo:
 - Prefer narrow runtime workspaces.
 - Add only the dirs and files the script truly needs.
 
+Package release mixed into deploy metadata:
+
+- Keep npm package release in `.dagger/release/npm.yaml`.
+- Keep deploy targets in `.dagger/deploy` and `.dagger/package`.
+- Use `release-env` for npm credentials and `deploy-env` for deploy/build
+  inputs.
+
 ## Final Checklist
 
 - Rush projects are stable and buildable.
 - Rush commands cover validation and build.
 - `.dagger/package` defines deploy artifacts and any build-time env allowlists.
 - `.dagger/deploy` defines deploy ordering and runtime behavior.
+- `.dagger/release` defines npm package release behavior when the repository
+  publishes packages.
 - `.dagger/validate` defines only orchestration-heavy checks.
 - Provider metadata is configured.
 - PR and release workflows use different permissions and policies.
 - Local dry-runs work before live deployment.
 
-From here, use the [Metadata](../metadata.md) and [Provider Adapters](../providers.md)
-references when you need exact schema details.
+Next: [NPM Package Release Baseline](12-npm-package-release-baseline.md).
 
 For editor validation, point metadata files at exact published schema versions
 such as

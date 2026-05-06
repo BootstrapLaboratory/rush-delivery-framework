@@ -107,28 +107,38 @@ For live releases, Rush Delivery prepares the metadata `target_branch` as a
 local branch before invoking `rush publish`, so Rush can merge the generated
 version commit back to the remote branch.
 
+The project still owns Rush package publishing policy: package names, version
+policies, change files, `publishConfig`, package `files`, and
+`common/config/rush/.npmrc-publish`. Rush Delivery owns the isolated CI runtime,
+source acquisition, build-before-publish lifecycle, release credentials, and
+Git push plumbing.
+
 NPM provenance is disabled by default. Keep `publish.provenance` omitted unless
 your release runtime is explicitly wired for npm's supported provenance
 provider detection from inside Dagger.
 
 ```yaml
 permissions:
-  contents: write
-  packages: write
+  contents: read
 
 jobs:
   release-packages:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: BootstrapLaboratory/rush-delivery@v0.6.6
         with:
           entrypoint: release-packages
           dry-run: "false"
-          toolchain-image-provider: github
-          rush-cache-provider: github
+          toolchain-image-provider: off
+          rush-cache-provider: off
           release-env: |
             NPM_TOKEN=${{ secrets.NPM_TOKEN }}
 ```
+
+Use `packages: write` and provider `github` only when the project also
+configures GHCR-backed toolchain images or Rush install cache.
 
 ## CI Using Command Line
 

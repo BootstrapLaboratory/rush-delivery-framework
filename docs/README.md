@@ -8,9 +8,9 @@ extension surface for validation, packaging, deployment, caches, and toolchains.
 
 - [Quick Start](quick-start/github-actions.md): recommended ways to run Rush
   Delivery from GitHub Actions, CI scripts, and local working trees.
+- [GitHub Action usage](github-actions.md): GitHub CI wrapper for validation,
+  deploy release workflows, and npm package release workflows.
 - [Public Dagger API](api.md): callable functions and when to use them.
-- [GitHub Action usage](github-actions.md): GitHub CI wrapper for validation
-  and release entrypoints.
 - [Entrypoints reference](entrypoints.md): every callable Dagger function and
   separate-use workflow.
 - [Workflow guide](workflows.md): local and CI workflow shapes.
@@ -37,3 +37,11 @@ Published schemas are available from the documentation site:
 Use exact versioned schema URLs in project metadata editor hints so older
 projects keep the schema contract they were written against. The root
 `/schemas/` URLs point at the current release line.
+
+## Package Release Reference
+
+The package release docs use
+[BootstrapLaboratory/labkit](https://github.com/BootstrapLaboratory/labkit) as a
+real npm package publishing reference. LabKit publishes public npm packages with
+Rush Delivery `v0.6.6`, Rush change files, `.dagger/release/npm.yaml`, and a
+dedicated `release-packages` GitHub workflow.

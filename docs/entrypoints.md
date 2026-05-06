@@ -79,13 +79,17 @@ dagger -m "$RUSH_DELIVERY_MODULE" call release-packages \
   --git-sha="$GIT_SHA" \
   --dry-run=false \
   --release-env-file="$RELEASE_ENV_FILE" \
-  --toolchain-image-provider=github \
-  --rush-cache-provider=github \
+  --toolchain-image-provider=off \
+  --rush-cache-provider=off \
   --source-mode=git \
   --source-repository-url="$SOURCE_REPOSITORY_URL" \
   --source-ref="$SOURCE_REF" \
   --source-auth-token-env=GITHUB_TOKEN
 ```
+
+Use `toolchain-image-provider=github` or `rush-cache-provider=github` only when
+the repository has matching provider metadata and the CI job has package
+registry permissions.
 
 For local dry-runs against a checked-out working tree, use `--repo=.` with
 `--source-mode=local_copy` and keep `--dry-run=true`.

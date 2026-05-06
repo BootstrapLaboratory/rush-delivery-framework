@@ -88,22 +88,30 @@ release env and does not touch deploy tags:
 
 ```yaml
 permissions:
-  contents: write
-  packages: write
+  contents: read
 
-steps:
-  - uses: BootstrapLaboratory/rush-delivery@v0.6.6
-    with:
-      entrypoint: release-packages
-      dry-run: "false"
-      toolchain-image-provider: github
-      rush-cache-provider: github
-      release-env: |
-        NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+jobs:
+  release-packages:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: BootstrapLaboratory/rush-delivery@v0.6.6
+        with:
+          entrypoint: release-packages
+          dry-run: "false"
+          toolchain-image-provider: off
+          rush-cache-provider: off
+          release-env: |
+            NPM_TOKEN=${{ secrets.NPM_TOKEN }}
 ```
 
 Rush Delivery appends `GITHUB_TOKEN` by default, so the release entrypoint can
 push the Rush-generated version commit back to the target branch.
+
+Add `packages` permissions only when provider-backed Rush cache or toolchain
+images use GitHub Container Registry.
 
 ## Version Pinning
 
@@ -122,6 +130,7 @@ unversioned branch in production CI.
 - PR workflow uses validate defaults or explicit `pull-or-build` policies.
 - Release workflow uses `packages: write`.
 - Package release workflow uses `contents: write`.
+- Package release workflow uses `release-env` for npm credentials.
 - Runtime files carry credential files.
 - Deploy env carries settings and secrets.
 - Manual force deploy workflows reuse the main workflow.

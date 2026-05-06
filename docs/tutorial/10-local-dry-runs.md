@@ -56,6 +56,24 @@ dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.6 call validate \
 
 This is useful before opening a PR or when debugging validation target metadata.
 
+## Package Release Dry Run
+
+To test npm release metadata and Rush publish planning without publishing:
+
+```sh
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.6 call release-packages \
+  --repo=. \
+  --git-sha="$(git rev-parse HEAD)" \
+  --dry-run=true \
+  --toolchain-image-provider=off \
+  --rush-cache-provider=off \
+  --source-mode=local_copy
+```
+
+This path reads `.dagger/release/npm.yaml` and runs the release build
+lifecycle. It does not require `NPM_TOKEN`, does not push a version commit, and
+does not publish packages.
+
 ## When To Use Provider-Backed Local Runs
 
 Provider-backed local runs are possible, but they need the same env values as
@@ -67,6 +85,8 @@ provider metadata, GHCR access, or cache behavior.
 - Use `--repo=.` for unpushed changes.
 - Use `--source-mode=local_copy` with local runs.
 - Use `--dry-run=true` while developing deploy metadata.
+- Use `release-packages --dry-run=true` while developing package release
+  metadata.
 - Use provider-off settings first.
 - Use forced targets to shorten feedback loops.
 

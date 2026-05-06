@@ -67,7 +67,8 @@ change files:
 ```
 
 For npm package release, use the standalone `release-packages` entrypoint while
-the release flow is kept separate from deploy workflow composition:
+the release flow is kept separate from deploy workflow composition. A
+package-only project can keep provider adapters off:
 
 ```yaml
 - name: Rush Delivery package release
@@ -75,8 +76,8 @@ the release flow is kept separate from deploy workflow composition:
   with:
     entrypoint: release-packages
     dry-run: "false"
-    toolchain-image-provider: github
-    rush-cache-provider: github
+    toolchain-image-provider: off
+    rush-cache-provider: off
     release-env: |
       NPM_TOKEN=${{ secrets.NPM_TOKEN }}
 ```
@@ -84,11 +85,14 @@ the release flow is kept separate from deploy workflow composition:
 The action appends `GITHUB_TOKEN` to the release env file by default, so live
 package release can push the Rush-generated version commit back to the target
 branch. The workflow job needs `contents: write`; it needs `packages: read` or
-`packages: write` only when using provider-backed Rush cache or toolchain
-images.
+`packages: write` only when using GHCR-backed Rush cache or toolchain images.
 Rush Delivery also prepares the release target branch locally before `rush
 publish`, because Rush checks out that branch for the final version-commit
 merge.
+
+Package release does not update deploy tags. Keep deploy release workflows and
+npm package release workflows separate until you intentionally compose them at
+the product workflow level.
 
 NPM provenance defaults to `false` in `.dagger/release/npm.yaml`. Opt in only
 when npm can detect a supported provenance provider from inside the Dagger

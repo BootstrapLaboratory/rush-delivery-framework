@@ -4,7 +4,7 @@ Rush Delivery is configured by metadata in `.dagger`. The directory belongs to
 the product repository, not to the Rush Delivery module, because target
 behavior is product-specific.
 
-The example repository uses this layout:
+A full Rush Delivery repository can use this layout:
 
 ```text
 .dagger/
@@ -29,6 +29,9 @@ The example repository uses this layout:
 ```
 
 Each part answers one question.
+
+Deploy-only repositories can omit `.dagger/release`. Package-only repositories
+can omit `.dagger/deploy` and `.dagger/package`.
 
 ## Deployment Graph
 

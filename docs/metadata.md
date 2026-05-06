@@ -48,7 +48,22 @@ publish:
   registry: https://registry.npmjs.org/
   tag: latest
   access: public
+  provenance: false
 ```
+
+Fields:
+
+- `kind`: currently `npm`.
+- `versioning.strategy`: currently `rush-change-files`.
+- `versioning.target_branch`: branch Rush publishes the generated version
+  commit back to, usually `main`.
+- `auth.kind`: currently `token`.
+- `auth.token_env`: release env key containing the npm token, usually
+  `NPM_TOKEN`.
+- `publish.registry`: optional npm registry URL passed to `rush publish`.
+- `publish.tag`: npm dist-tag, defaulting to `latest`.
+- `publish.access`: optional npm access level, `public` or `restricted`.
+- `publish.provenance`: optional boolean, defaulting to `false`.
 
 For token auth, keep the npm token in the release env file and reference it
 from `common/config/rush/.npmrc-publish`, for example:
@@ -56,6 +71,45 @@ from `common/config/rush/.npmrc-publish`, for example:
 ```text
 //registry.npmjs.org/:_authToken=${NPM_TOKEN}
 ```
+
+The repository still owns Rush and npm package policy. For example, LabKit uses
+a Rush version policy:
+
+```json
+[
+  {
+    "definitionName": "individualVersion",
+    "policyName": "labkit"
+  }
+]
+```
+
+and each publishable Rush project references it from `rush.json`:
+
+```json
+{
+  "packageName": "@omgjs/labkit-webapp-ui",
+  "projectFolder": "packages/webapp-ui",
+  "versionPolicyName": "labkit"
+}
+```
+
+Package-level npm metadata remains package-owned:
+
+```json
+{
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": ["dist/**/*", "README.md"]
+}
+```
+
+Private tooling packages can stay in the Rush repo for build and lint support
+without becoming part of the public release contract. Rush and npm decide what
+is publishable from package metadata and Rush publish behavior; Rush Delivery
+does not maintain a separate package allowlist.
 
 `publish.provenance` defaults to `false`. Keep it omitted or set to `false`
 for the default Dagger-contained release flow, because npm automatic provenance

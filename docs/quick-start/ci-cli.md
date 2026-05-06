@@ -97,13 +97,23 @@ dagger -m "${RUSH_DELIVERY_MODULE}" call release-packages \
   --git-sha="${GITHUB_SHA}" \
   --dry-run=false \
   --release-env-file="${RELEASE_ENV_FILE}" \
-  --toolchain-image-provider=github \
-  --rush-cache-provider=github \
+  --toolchain-image-provider=off \
+  --rush-cache-provider=off \
   --source-mode=git \
   --source-repository-url="${SOURCE_REPOSITORY_URL}" \
   --source-ref="${GITHUB_REF}" \
   --source-auth-token-env=GITHUB_TOKEN
 ```
+
+Use provider `github` when the repository has `.dagger/toolchain-images` or
+`.dagger/rush-cache` metadata and the CI job has matching package registry
+permissions. For a package-only npmjs release, provider `off` is the smallest
+portable shape.
+
+The release env file must include the env named by `.dagger/release/npm.yaml`
+`auth.token_env`, usually `NPM_TOKEN`. It must also include the Git source token
+used by `--source-auth-token-env`, because live release needs to push the
+Rush-generated version commit back to the target branch.
 
 Use [Local Runs](local-run.md) when you need to test changes that have not been
 pushed to the remote repository yet.

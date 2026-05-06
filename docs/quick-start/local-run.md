@@ -29,9 +29,30 @@ dagger -m "${RUSH_DELIVERY_MODULE}" call validate \
   --source-mode=local_copy
 ```
 
+For a local package-release dry-run:
+
+```sh
+dagger -m "${RUSH_DELIVERY_MODULE}" call release-packages \
+  --repo=. \
+  --git-sha="$(git rev-parse HEAD)" \
+  --dry-run=true \
+  --toolchain-image-provider=off \
+  --rush-cache-provider=off \
+  --source-mode=local_copy
+```
+
+This reads `.dagger/release/npm.yaml`, runs the release build lifecycle, and
+executes the non-publishing Rush publish path. It does not require `NPM_TOKEN`,
+does not push the generated version commit, and does not publish packages.
+
+Avoid live package publishing from a local workstation unless you are
+deliberately testing the release path with disposable packages. Live package
+release expects Git source mode, release env credentials, and a clean CI-style
+source ref.
+
 Keep live deploy credentials out of source. If a local live deploy needs files
 such as cloud credentials, pass them through a runtime files directory and refer
 to them from target metadata.
 
-For deployment metadata, see [Metadata contracts](../metadata.md). For workflow
-shape and release behavior, see the [Workflow Guide](../workflows.md).
+For deployment and release metadata, see [Metadata contracts](../metadata.md).
+For workflow shape and release behavior, see the [Workflow Guide](../workflows.md).

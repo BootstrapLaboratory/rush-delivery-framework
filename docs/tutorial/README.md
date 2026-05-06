@@ -1,13 +1,19 @@
 # Tutorial
 
 This tutorial walks through a complete Rush Delivery setup for a Rush monorepo.
-It uses a real public project as the worked example:
+It uses two real public projects as worked examples:
 
 [BootstrapLaboratory/typescript_monorepo_nestjs_relay_trunk](https://github.com/BootstrapLaboratory/typescript_monorepo_nestjs_relay_trunk)
 
-That repository is already wired end to end with Rush Delivery. It deploys a
+is the deployment example. It is wired end to end with Rush Delivery, deploys a
 NestJS backend to Google Cloud Run, deploys a React webapp to Cloudflare Pages,
-and validates pull requests through Rush Delivery before changes reach `main`.
+and validates pull requests before changes reach `main`.
+
+[BootstrapLaboratory/labkit](https://github.com/BootstrapLaboratory/labkit)
+
+is the package release example. It publishes public npm packages through Rush
+Delivery `release-packages`, Rush change files, `.dagger/release/npm.yaml`, and
+a dedicated GitHub workflow.
 
 The cloud providers are examples, not requirements. The reusable part is the
 shape:
@@ -32,16 +38,17 @@ By the end of the tutorial, a project should have this shape:
 ├── .dagger/
 │   ├── deploy/
 │   ├── package/
+│   ├── release/
 │   ├── rush-cache/
 │   ├── toolchain-images/
 │   └── validate/
 └── .github/workflows/
 ```
 
-The tutorial does not teach NestJS, Relay, React, Google Cloud Run, or
-Cloudflare Pages in depth. Those are implementation details of the example
-project. The point is to teach how a Rush project becomes a Rush Delivery
-project.
+The tutorial does not teach NestJS, Relay, React, Google Cloud Run, Cloudflare
+Pages, or npm package design in depth. Those are implementation details of the
+example projects. The point is to teach how a Rush project becomes a Rush
+Delivery project.
 
 ## Chapters
 
@@ -56,10 +63,13 @@ project.
 9. [GitHub Actions](09-github-actions.md)
 10. [Local Dry Runs](10-local-dry-runs.md)
 11. [Adapt To Your Project](11-adapting-to-your-project.md)
+12. [NPM Package Release Baseline](12-npm-package-release-baseline.md)
+13. [Release Metadata](13-release-metadata.md)
+14. [Package Release Workflow](14-package-release-workflow.md)
 
-## The Example Repository
+## The Deployment Example Repository
 
-The example has three Rush projects:
+The deployment example has three Rush projects:
 
 - `api-contract` in `libs/api`
 - `server` in `apps/server`
@@ -78,3 +88,15 @@ server, and performs a smoke check.
 Use the example repository as a reference implementation. Copy shapes and
 contracts from it, but adapt target names, scripts, environment variables, and
 provider choices to your own product.
+
+## The Package Release Example Repository
+
+The package release example is
+[BootstrapLaboratory/labkit](https://github.com/BootstrapLaboratory/labkit). It
+has a package-only Rush monorepo with public npm packages, Rush version
+policies, package `publishConfig`, `.npmrc-publish`, and a
+`release-packages` workflow using Rush Delivery `v0.6.6`.
+
+Use LabKit as the reference for npm publishing shape. Copy the release
+contracts from it, but adapt package names, version policy names, registry,
+access level, and token handling to your own packages.

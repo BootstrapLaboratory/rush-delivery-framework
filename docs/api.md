@@ -67,8 +67,8 @@ dagger -m "$RUSH_DELIVERY_MODULE" call release-packages \
   --git-sha="$GIT_SHA" \
   --dry-run=false \
   --release-env-file="$RELEASE_ENV_FILE" \
-  --toolchain-image-provider=github \
-  --rush-cache-provider=github \
+  --toolchain-image-provider=off \
+  --rush-cache-provider=off \
   --source-mode=git \
   --source-repository-url="$SOURCE_REPOSITORY_URL" \
   --source-ref="$SOURCE_REF" \
@@ -85,6 +85,10 @@ same planning path without pushing commits, tags, or packages.
 project metadata and `.dagger/release/npm.yaml`, but it does not require deploy
 metadata. Rush cache provider metadata is only required when the selected Rush
 cache provider is not `off`.
+
+The release env file must contain the npm token named by
+`.dagger/release/npm.yaml` and the Git token named by `sourceAuthTokenEnv` for
+live Git source releases.
 
 See [Entrypoints reference](entrypoints.md) for every callable function,
 including separate `detect`, `build`, `package`, `deploy`, metadata validation,
