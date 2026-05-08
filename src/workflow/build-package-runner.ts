@@ -3,7 +3,7 @@ import { Container, Directory } from "@dagger.io/dagger";
 import type { CiPlan } from "../model/ci-plan.ts";
 import type { PackageManifestArtifact } from "../model/package-manifest.ts";
 import { buildRushBuildSteps } from "../stages/build-stage/rush-build-plan.ts";
-import { formatCiPlan } from "../ci-plan/parse-ci-plan.ts";
+import { createCiPlan, formatCiPlan } from "../ci-plan/parse-ci-plan.ts";
 import { computeCiPlan } from "../stages/detect/compute-ci-plan.ts";
 import { loadPackageTargetDefinition } from "../stages/package-stage/load-package-metadata.ts";
 import { buildPackageActionPlan } from "../stages/package-stage/package-action-plan.ts";
@@ -18,6 +18,7 @@ import {
   prepareRushWorkflowContainer,
   type RushWorkflowContainerOptions,
 } from "../rush/workflow-container.ts";
+import { buildRushAllProjectsLifecycleSteps } from "../rush/rush-command-plan.ts";
 import {
   resolvePackageBuildEnvironment,
   withBuildEnvironment,
@@ -39,15 +40,20 @@ function runBuildStage(
   container: Container,
   ciPlan: CiPlan,
   buildEnv: Record<string, string>,
+  buildMode: "all-projects" | "deploy-targets",
 ): Container {
   logSection("Rush build");
 
-  if (ciPlan.deploy_targets.length === 0) {
+  if (ciPlan.deploy_targets.length === 0 && buildMode === "deploy-targets") {
     console.log("[build] no deploy targets selected");
     return container;
   }
 
-  console.log(`[build] Rush targets: ${ciPlan.deploy_targets.join(", ")}`);
+  if (buildMode === "all-projects") {
+    console.log("[build] Rush targets: all projects");
+  } else {
+    console.log(`[build] Rush targets: ${ciPlan.deploy_targets.join(", ")}`);
+  }
 
   if (Object.keys(buildEnv).length > 0) {
     console.log(
@@ -59,8 +65,12 @@ function runBuildStage(
     container.withEnvVariable("FAILURE_MODE", "deploy"),
     buildEnv,
   );
+  const rushSteps =
+    buildMode === "all-projects"
+      ? buildRushAllProjectsLifecycleSteps()
+      : buildRushBuildSteps(ciPlan);
 
-  for (const { command, args } of buildRushBuildSteps(ciPlan)) {
+  for (const { command, args } of rushSteps) {
     console.log(`[build] Rush command: ${args[1]}`);
     nextContainer = nextContainer.withExec([command, ...args], {
       expand: false,
@@ -128,12 +138,16 @@ async function runPackageStage(
 }
 
 export type BuildPackageWorkflowResult = {
+  container: Container;
   ciPlan: CiPlan;
   repo: Directory;
 };
 
 export type BuildPackageWorkflowOptions = RushWorkflowContainerOptions & {
+  buildHostEnv?: Record<string, string>;
   dryRun?: boolean;
+  releaseTargets?: string[];
+  skipDeployPlanning?: boolean;
 };
 
 export async function runBuildPackageWorkflow(
@@ -148,29 +162,56 @@ export async function runBuildPackageWorkflow(
   logSection("Detect release targets");
 
   const baseContainer = await prepareRushWorkflowContainer(repo, options);
-  const ciPlan = await computeCiPlan(
-    repo,
-    baseContainer,
-    eventName,
-    forceTargetsJson,
-    prBaseSha,
-    deployTagPrefix,
-  );
+  const releaseTargets = options.releaseTargets ?? [];
+  const deployCiPlan = options.skipDeployPlanning
+    ? createCiPlan({
+        affectedProjectsByDeployTarget: {},
+        deployTargets: [],
+        mode: eventName === "pull_request" ? "pull_request" : "release",
+        prBaseSha: eventName === "pull_request" ? prBaseSha : "",
+        releaseTargets: [],
+        validateTargets: [],
+      })
+    : await computeCiPlan(
+        repo,
+        baseContainer,
+        eventName,
+        forceTargetsJson,
+        prBaseSha,
+        deployTagPrefix,
+      );
+  const ciPlan = createCiPlan({
+    affectedProjectsByDeployTarget:
+      deployCiPlan.affected_projects_by_deploy_target,
+    deployTargets: deployCiPlan.deploy_targets,
+    mode: deployCiPlan.mode,
+    prBaseSha: deployCiPlan.pr_base_sha,
+    releaseTargets,
+    validateTargets: deployCiPlan.validate_targets,
+  });
   const detectedContainer = buildDetectedContainer(baseContainer, ciPlan);
+  const buildMode = releaseTargets.includes("npm")
+    ? "all-projects"
+    : "deploy-targets";
+  const needsRushLifecycle =
+    buildMode === "all-projects" || ciPlan.deploy_targets.length > 0;
 
   console.log(
-    `[detect] mode=${ciPlan.mode} deploy_targets=${JSON.stringify(ciPlan.deploy_targets)} validate_targets=${JSON.stringify(ciPlan.validate_targets)}`,
+    `[detect] mode=${ciPlan.mode} deploy_targets=${JSON.stringify(ciPlan.deploy_targets)} release_targets=${JSON.stringify(ciPlan.release_targets)} validate_targets=${JSON.stringify(ciPlan.validate_targets)}`,
   );
 
-  if (ciPlan.deploy_targets.length === 0) {
-    return {
+  if (!needsRushLifecycle) {
+    const packagedRepo = await runPackageStage(
+      repo,
+      detectedContainer,
       ciPlan,
-      repo: await runPackageStage(
-        repo,
-        detectedContainer,
-        ciPlan,
-        artifactPrefix,
-      ),
+      artifactPrefix,
+    );
+
+    return {
+      container: detectedContainer,
+      ciPlan,
+      repo: packagedRepo,
     };
   }
 
@@ -184,14 +225,19 @@ export async function runBuildPackageWorkflow(
   const buildEnv = await resolvePackageBuildEnvironment(
     repo,
     ciPlan.deploy_targets,
-    options.hostEnv ?? {},
+    options.buildHostEnv ?? options.hostEnv ?? {},
     {
       dryRun: options.dryRun ?? false,
       requirePackageTargets: true,
       stage: "build",
     },
   );
-  const builtContainer = runBuildStage(rushContainer, ciPlan, buildEnv);
+  const builtContainer = runBuildStage(
+    rushContainer,
+    ciPlan,
+    buildEnv,
+    buildMode,
+  );
   const packagedRepo = await runPackageStage(
     repo,
     builtContainer,
@@ -200,6 +246,7 @@ export async function runBuildPackageWorkflow(
   );
 
   return {
+    container: builtContainer,
     ciPlan,
     repo: packagedRepo,
   };

@@ -14,7 +14,7 @@ permissions:
   packages: read
 
 steps:
-  - uses: BootstrapLaboratory/rush-delivery@v0.6.7
+  - uses: BootstrapLaboratory/rush-delivery@v0.7.0
     with:
       entrypoint: validate
       toolchain-image-provider: github
@@ -83,8 +83,26 @@ metadata, provider settings, runtime files, package logic, and deploy mesh.
 
 ## Package Release Workflow
 
-Package release/versioning should start as a separate workflow. It uses its own
-release env and does not touch deploy tags:
+Package release/versioning can be composed into the main trusted workflow when
+the same job should deploy applications and release npm packages:
+
+```yaml
+- uses: BootstrapLaboratory/rush-delivery@v0.7.0
+  with:
+    dry-run: "false"
+    release-targets-json: '["npm"]'
+    deploy-env: |
+      GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
+    release-env: |
+      NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+```
+
+Rush Delivery shares source acquisition, Rush install cache, and the build
+lifecycle, then starts deploy and npm package release side effects after shared
+prerequisites pass. Deploy tags still point to the original source SHA.
+
+For package-only repositories or release debugging, keep a separate standalone
+workflow. It uses its own release env and does not touch deploy tags:
 
 ```yaml
 permissions:
@@ -97,7 +115,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.7
+      - uses: BootstrapLaboratory/rush-delivery@v0.7.0
         with:
           entrypoint: release-packages
           dry-run: "false"
@@ -118,7 +136,7 @@ images use GitHub Container Registry.
 Pin Rush Delivery to a released tag:
 
 ```yaml
-uses: BootstrapLaboratory/rush-delivery@v0.6.7
+uses: BootstrapLaboratory/rush-delivery@v0.7.0
 ```
 
 Advance the tag intentionally when you want new behavior. Do not use an

@@ -41,12 +41,13 @@ export async function deployRelease(
   runtimeMountRepo?: Directory,
   deployTagTokenEnv: string = "",
   runtimeFiles?: Directory,
+  hostEnvOverride?: Record<string, string>,
 ): Promise<string> {
   logSection("Deploy release");
 
-  const hostEnv = deployEnvFile
-    ? parseDeployEnvFile(await deployEnvFile.contents())
-    : {};
+  const hostEnv =
+    hostEnvOverride ??
+    (deployEnvFile ? parseDeployEnvFile(await deployEnvFile.contents()) : {});
   const deploymentPlan = await buildReleasePlan(repo, releaseTargetsJson);
   const parsedToolchainImageProvider = parseToolchainImageProvider(
     toolchainImageProvider,

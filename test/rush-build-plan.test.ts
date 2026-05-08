@@ -17,6 +17,7 @@ const ciPlan = {
   deploy_targets: ["server", "webapp"],
   mode: "release",
   pr_base_sha: "",
+  release_targets: [],
   validate_targets: ["api-contract", "server"],
 } satisfies CiPlan;
 

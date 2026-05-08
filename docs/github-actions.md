@@ -28,7 +28,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.7
+      - uses: BootstrapLaboratory/rush-delivery@v0.7.0
         with:
           entrypoint: validate
           toolchain-image-provider: github
@@ -52,7 +52,7 @@ steps:
     with:
       fetch-depth: 0
 
-  - uses: BootstrapLaboratory/rush-delivery@v0.6.7
+  - uses: BootstrapLaboratory/rush-delivery@v0.7.0
     with:
       entrypoint: validate
       repo: .
@@ -61,9 +61,10 @@ steps:
 
 ## Release Workflow
 
-Provider authentication stays in the caller workflow. Pass any generated files
-to Rush Delivery through `runtime-file-map`, and pass build or deploy
-environment values through `deploy-env`.
+Provider authentication stays in the caller workflow. Pass shared values through
+`workflow-env`, generated files through `runtime-file-map`, build or deploy
+values through `deploy-env`, and package release values through `release-env`.
+The `.dagger` metadata still decides which values reach each stage.
 
 ```yaml
 steps:
@@ -76,7 +77,7 @@ steps:
       service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
   - name: Rush Delivery
-    uses: BootstrapLaboratory/rush-delivery@v0.6.7
+    uses: BootstrapLaboratory/rush-delivery@v0.7.0
     with:
       force-targets-json: ${{ inputs.force_targets_json || '[]' }}
       deploy-tag-prefix: ${{ env.DEPLOY_TAG_PREFIX }}
@@ -87,8 +88,11 @@ steps:
       toolchain-image-policy: ${{ env.TOOLCHAIN_IMAGE_POLICY }}
       rush-cache-provider: ${{ env.RUSH_CACHE_PROVIDER }}
       rush-cache-policy: ${{ env.RUSH_CACHE_POLICY }}
+      release-targets-json: '["npm"]'
       runtime-file-map: |
         ${{ steps.auth.outputs.credentials_file_path }}=>gcp-credentials.json
+      release-env: |
+        NPM_TOKEN=${{ secrets.NPM_TOKEN }}
       deploy-env: |
         GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
         GCP_ARTIFACT_REGISTRY_REPOSITORY=${{ vars.GCP_ARTIFACT_REGISTRY_REPOSITORY }}
@@ -104,16 +108,27 @@ steps:
         WEBAPP_URL=https://${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME }}.pages.dev
 ```
 
-The action appends `GITHUB_ACTOR`, `GITHUB_REPOSITORY`, `GITHUB_API_URL`, and
-`GITHUB_TOKEN` to generated env files by default. Set
-`include-github-env: "false"` if you want to provide those values yourself.
+`release-targets-json` is explicit because npm package release creates external
+side effects: published packages and a Rush-generated version commit. When npm
+release is selected, Rush Delivery runs the all-project Rush lifecycle once,
+then starts deploy and package release side effects after shared prerequisites
+have passed. These side effects are concurrent but not transactional; if one
+external system fails after the other succeeds, the successful side effect may
+already exist.
+
+For `workflow`, the action appends `GITHUB_ACTOR`, `GITHUB_REPOSITORY`,
+`GITHUB_API_URL`, and `GITHUB_TOKEN` to the generated `workflow-env` file by
+default. Set `include-github-env: "false"` if you want to provide those values
+yourself. `deploy-env` and `release-env` may repeat workflow values only when
+the value is identical.
 
 ## Package Release
 
-Use `entrypoint: release-packages` when a workflow should publish npm packages
-from `.dagger/release/npm.yaml`. Keep npm credentials in `release-env`, not
-`deploy-env`; package release credentials are separate from deploy credentials
-because npm publishing is a registry side effect, not a deploy target runtime.
+Use `entrypoint: release-packages` when npm package release should stay as a
+standalone workflow, for example in package-only repositories or release
+debugging. Keep npm credentials in `release-env`, not `deploy-env`; package
+release credentials are separate from deploy credentials because npm publishing
+is a registry side effect, not a deploy target runtime.
 
 The smallest package-only workflow can keep provider adapters off. This is the
 shape used by package-only projects such as
@@ -136,7 +151,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.7
+      - uses: BootstrapLaboratory/rush-delivery@v0.7.0
         with:
           entrypoint: release-packages
           dry-run: "false"
@@ -211,7 +226,7 @@ The action mode does not replace raw Dagger usage. Local runs, other CI
 providers, and lower-level debugging can still call the module directly:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.7.0 call workflow \
   --git-sha="$GITHUB_SHA" \
   --source-mode=git \
   --source-repository-url="$SOURCE_REPOSITORY_URL" \

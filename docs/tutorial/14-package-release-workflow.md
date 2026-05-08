@@ -1,6 +1,40 @@
 # Package Release Workflow
 
-Run package release as a dedicated trusted workflow. It has a different
+Package release can run either as part of the main trusted `workflow` or as a
+dedicated trusted workflow. Compose it into `workflow` when the same CI job
+should deploy applications and release npm packages; keep it standalone for
+package-only repositories, release debugging, or stricter operational
+separation.
+
+## Composed Workflow
+
+Select package release explicitly:
+
+```yaml
+- uses: BootstrapLaboratory/rush-delivery@v0.7.0
+  with:
+    dry-run: "false"
+    release-targets-json: '["npm"]'
+    deploy-env: |
+      GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
+    release-env: |
+      NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+```
+
+In this mode, Rush Delivery shares source acquisition, metadata validation,
+Rush install cache, and the Rush lifecycle. When `npm` is selected, it runs the
+all-project lifecycle once, then starts deploy and npm package release side
+effects after the shared prerequisites pass. Deploy tags continue to point at
+the original source SHA. The Rush package release branch pushes its generated
+version commit to `versioning.target_branch`.
+
+Deploy and package release side effects are concurrent but not transactional.
+Rush Delivery waits for all started branches and reports every failure, but a
+successful external side effect may already exist if another branch fails.
+
+## Standalone Workflow
+
+Run package release as a dedicated trusted workflow when it has a different
 permission profile from PR validation and deploy release workflows.
 
 LabKit uses `.github/workflows/package-release.yaml` with
@@ -29,7 +63,7 @@ jobs:
       contents: write
     steps:
       - name: Run Rush Delivery package release
-        uses: BootstrapLaboratory/rush-delivery@v0.6.7
+        uses: BootstrapLaboratory/rush-delivery@v0.7.0
         with:
           entrypoint: release-packages
           dry-run: "false"
@@ -76,7 +110,7 @@ permissions:
   packages: read
 
 steps:
-  - uses: BootstrapLaboratory/rush-delivery@v0.6.7
+  - uses: BootstrapLaboratory/rush-delivery@v0.7.0
     with:
       entrypoint: validate
       toolchain-image-provider: github
@@ -92,7 +126,7 @@ cache from PRs. Package release credentials are not passed to PR validation.
 Use local-copy source mode to test metadata and release behavior before pushing:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call release-packages \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.7.0 call release-packages \
   --repo=. \
   --git-sha="$(git rev-parse HEAD)" \
   --dry-run=true \

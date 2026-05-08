@@ -3,6 +3,7 @@ import type {
   FileMountSpec,
 } from "../../model/deploy-target.ts";
 import type { HostEnv } from "../../model/env.ts";
+import { parseEnvFileContents } from "../../env/env-file.ts";
 import { resolvePassThroughEnvironment } from "../../env/pass-through.ts";
 
 function isNonEmptyString(value: string | undefined): value is string {
@@ -10,33 +11,7 @@ function isNonEmptyString(value: string | undefined): value is string {
 }
 
 export function parseDeployEnvFile(contents: string): Record<string, string> {
-  const envVars: Record<string, string> = {};
-
-  for (const rawLine of contents.split(/\r?\n/)) {
-    const line = rawLine.trim();
-
-    if (line.length === 0 || line.startsWith("#")) {
-      continue;
-    }
-
-    const separatorIndex = line.indexOf("=");
-    if (separatorIndex === -1) {
-      throw new Error(
-        `Invalid deploy env line "${rawLine}". Expected KEY=VALUE format.`,
-      );
-    }
-
-    const key = line.slice(0, separatorIndex).trim();
-    const value = line.slice(separatorIndex + 1);
-
-    if (!/^[A-Z][A-Z0-9_]*$/.test(key)) {
-      throw new Error(`Invalid deploy env key "${key}".`);
-    }
-
-    envVars[key] = value;
-  }
-
-  return envVars;
+  return parseEnvFileContents(contents, "deploy env");
 }
 
 export function resolveSpecEnvironment(

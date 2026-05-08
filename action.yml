@@ -56,6 +56,10 @@ inputs:
     description: JSON array of deploy targets to force.
     required: false
     default: "[]"
+  release-targets-json:
+    description: JSON array of package release targets to run from the workflow entrypoint.
+    required: false
+    default: "[]"
   validate-targets-json:
     description: JSON array of Rush projects to validate when entrypoint is validate.
     required: false
@@ -81,6 +85,14 @@ inputs:
     required: false
     default: "true"
 
+  workflow-env:
+    description: Multiline KEY=VALUE workflow environment content shared by workflow stages.
+    required: false
+    default: ""
+  workflow-env-file:
+    description: Existing workflow env file to copy before appending workflow-env.
+    required: false
+    default: ""
   deploy-env:
     description: Multiline KEY=VALUE deploy environment content.
     required: false
@@ -145,7 +157,7 @@ inputs:
     required: false
     default: ""
   source-auth-token-env:
-    description: Deploy env key containing the Git source token.
+    description: Env key containing the Git source token. For workflow, put it in workflow-env unless an existing deploy/release overlay already provides it.
     required: false
     default: GITHUB_TOKEN
   source-auth-username:
@@ -176,6 +188,9 @@ outputs:
   deploy-env-file:
     description: Prepared deploy env file path.
     value: ${{ steps.prepare.outputs.deploy-env-file }}
+  workflow-env-file:
+    description: Prepared workflow env file path.
+    value: ${{ steps.prepare.outputs.workflow-env-file }}
   release-env-file:
     description: Prepared release env file path.
     value: ${{ steps.prepare.outputs.release-env-file }}
@@ -196,12 +211,15 @@ runs:
         INPUT_GIT_SHA: ${{ inputs.git-sha }}
         INPUT_EVENT_NAME: ${{ inputs.event-name }}
         INPUT_FORCE_TARGETS_JSON: ${{ inputs.force-targets-json }}
+        INPUT_RELEASE_TARGETS_JSON: ${{ inputs.release-targets-json }}
         INPUT_VALIDATE_TARGETS_JSON: ${{ inputs.validate-targets-json }}
         INPUT_PR_BASE_SHA: ${{ inputs.pr-base-sha }}
         INPUT_DEPLOY_TAG_PREFIX: ${{ inputs.deploy-tag-prefix }}
         INPUT_ARTIFACT_PREFIX: ${{ inputs.artifact-prefix }}
         INPUT_ENVIRONMENT: ${{ inputs.environment }}
         INPUT_DRY_RUN: ${{ inputs.dry-run }}
+        INPUT_WORKFLOW_ENV: ${{ inputs.workflow-env }}
+        INPUT_WORKFLOW_ENV_FILE: ${{ inputs.workflow-env-file }}
         INPUT_DEPLOY_ENV: ${{ inputs.deploy-env }}
         INPUT_DEPLOY_ENV_FILE: ${{ inputs.deploy-env-file }}
         INPUT_RELEASE_ENV: ${{ inputs.release-env }}

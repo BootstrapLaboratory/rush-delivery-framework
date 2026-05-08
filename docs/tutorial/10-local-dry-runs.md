@@ -9,7 +9,7 @@ working tree with `--repo=.` and use `source-mode=local_copy`.
 Run the full workflow without publishing provider artifacts or deploying:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.7.0 call workflow \
   --repo=. \
   --git-sha="$(git rev-parse HEAD)" \
   --event-name=manual \
@@ -29,7 +29,7 @@ and safe. They do not need GHCR permissions.
 To exercise one target, force it:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call workflow \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.7.0 call workflow \
   --repo=. \
   --git-sha="$(git rev-parse HEAD)" \
   --event-name=manual \
@@ -47,7 +47,7 @@ runtime env.
 To validate local changes against your main branch:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call validate \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.7.0 call validate \
   --repo=. \
   --event-name=pull_request \
   --pr-base-sha="$(git merge-base HEAD origin/main)" \
@@ -58,10 +58,24 @@ This is useful before opening a PR or when debugging validation target metadata.
 
 ## Package Release Dry Run
 
-To test npm release metadata and Rush publish planning without publishing:
+To test npm release metadata inside the composed workflow without publishing:
 
 ```sh
-dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.6.7 call release-packages \
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.7.0 call workflow \
+  --repo=. \
+  --git-sha="$(git rev-parse HEAD)" \
+  --event-name=manual \
+  --release-targets-json='["npm"]' \
+  --dry-run=true \
+  --toolchain-image-provider=off \
+  --rush-cache-provider=off \
+  --source-mode=local_copy
+```
+
+To test only the standalone npm release entrypoint:
+
+```sh
+dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.7.0 call release-packages \
   --repo=. \
   --git-sha="$(git rev-parse HEAD)" \
   --dry-run=true \

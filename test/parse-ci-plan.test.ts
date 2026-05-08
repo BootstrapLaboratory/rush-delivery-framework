@@ -17,7 +17,8 @@ test("parses canonical CI plan handoff", () => {
         "webapp": ["webapp"]
       },
       "validate_targets": [],
-      "deploy_targets": ["server", "webapp"]
+      "deploy_targets": ["server", "webapp"],
+      "release_targets": ["npm"]
     }`),
     {
       affected_projects_by_deploy_target: {
@@ -27,6 +28,27 @@ test("parses canonical CI plan handoff", () => {
       deploy_targets: ["server", "webapp"],
       mode: "release",
       pr_base_sha: "",
+      release_targets: ["npm"],
+      validate_targets: [],
+    },
+  );
+});
+
+test("parses old CI plan handoff without release targets", () => {
+  assert.deepStrictEqual(
+    parseCiPlan(`{
+      "mode": "release",
+      "pr_base_sha": "",
+      "affected_projects_by_deploy_target": {},
+      "validate_targets": [],
+      "deploy_targets": []
+    }`),
+    {
+      affected_projects_by_deploy_target: {},
+      deploy_targets: [],
+      mode: "release",
+      pr_base_sha: "",
+      release_targets: [],
       validate_targets: [],
     },
   );
@@ -68,6 +90,7 @@ test("creates and formats canonical CI plan handoff JSON", () => {
     deployTargets: ["server"],
     mode: "release",
     prBaseSha: "",
+    releaseTargets: ["npm"],
     validateTargets: [],
   });
 
@@ -78,6 +101,7 @@ test("creates and formats canonical CI plan handoff JSON", () => {
     deploy_targets: ["server"],
     mode: "release",
     pr_base_sha: "",
+    release_targets: ["npm"],
     validate_targets: [],
   });
 });

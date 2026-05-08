@@ -39,15 +39,18 @@ For GitHub Actions, prefer the repository action wrapper:
 
 ```yaml
 - name: Rush Delivery
-  uses: BootstrapLaboratory/rush-delivery@v0.6.7
+  uses: BootstrapLaboratory/rush-delivery@v0.7.0
   with:
     force-targets-json: ${{ inputs.force_targets_json || '[]' }}
     environment: prod
     dry-run: "false"
+    release-targets-json: '["npm"]'
     runtime-file-map: |
       ${{ steps.auth.outputs.credentials_file_path }}=>gcp-credentials.json
     deploy-env: |
       GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
+    release-env: |
+      NPM_TOKEN=${{ secrets.NPM_TOKEN }}
 ```
 
 See [GitHub Action usage](github-actions.md) for the complete production shape.
@@ -59,20 +62,26 @@ change files:
 
 ```yaml
 - name: Rush Delivery validation
-  uses: BootstrapLaboratory/rush-delivery@v0.6.7
+  uses: BootstrapLaboratory/rush-delivery@v0.7.0
   with:
     entrypoint: validate
     toolchain-image-provider: github
     rush-cache-provider: github
 ```
 
-For npm package release, use the standalone `release-packages` entrypoint while
-the release flow is kept separate from deploy workflow composition. A
-package-only project can keep provider adapters off:
+For npm package release, prefer composing it into `workflow` with explicit
+`release-targets-json: '["npm"]'` when the same trusted CI job should deploy
+applications and release packages. Rush Delivery shares source acquisition,
+metadata validation, Rush install cache, and the build lifecycle, then starts
+deploy and package release side effects after the shared prerequisites pass.
+
+The standalone `release-packages` entrypoint remains useful for package-only
+projects and release debugging. A package-only project can keep provider
+adapters off:
 
 ```yaml
 - name: Rush Delivery package release
-  uses: BootstrapLaboratory/rush-delivery@v0.6.7
+  uses: BootstrapLaboratory/rush-delivery@v0.7.0
   with:
     entrypoint: release-packages
     dry-run: "false"
@@ -90,9 +99,13 @@ Rush Delivery also prepares the release target branch locally before `rush
 publish`, because Rush checks out that branch for the final version-commit
 merge.
 
-Package release does not update deploy tags. Keep deploy release workflows and
-npm package release workflows separate until you intentionally compose them at
-the product workflow level.
+Composed package release does not change deploy tag identity. Deploy tags
+continue to point at the original source SHA. Rush package release creates and
+pushes its own version commit to the metadata `target_branch`.
+
+Deploy and package release side effects are concurrent but not transactional.
+Rush Delivery waits for both started branches and reports every failure, but a
+successful external side effect may already exist if the other branch fails.
 
 NPM provenance defaults to `false` in `.dagger/release/npm.yaml`. Opt in only
 when npm can detect a supported provenance provider from inside the Dagger
@@ -104,6 +117,9 @@ For a raw Dagger command this means:
 - Authenticate to external providers when live deploy targets need it.
 - Write a deploy environment file with provider secrets, build-time values, and
   deploy configuration.
+- Write a workflow environment file for shared source/provider values.
+- Write a release environment file when package release needs registry
+  credentials.
 - Copy deploy-only credential files into a runtime files directory when targets
   mount files.
 - Call `dagger -m "$RUSH_DELIVERY_MODULE" call workflow`.
@@ -128,7 +144,10 @@ dagger -m "$RUSH_DELIVERY_MODULE" call workflow \
   --artifact-prefix="$DEPLOY_ARTIFACT_PREFIX" \
   --environment=prod \
   --dry-run=false \
+  --workflow-env-file="$WORKFLOW_ENV_FILE" \
   --deploy-env-file="$DEPLOY_ENV_FILE" \
+  --release-targets-json="$RELEASE_TARGETS_JSON" \
+  --release-env-file="$RELEASE_ENV_FILE" \
   --host-workspace-dir="$GITHUB_WORKSPACE" \
   --toolchain-image-provider="$TOOLCHAIN_IMAGE_PROVIDER" \
   --toolchain-image-policy="$TOOLCHAIN_IMAGE_POLICY" \

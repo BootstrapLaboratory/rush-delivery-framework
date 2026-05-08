@@ -3,5 +3,6 @@ export type CiPlan = {
   deploy_targets: string[];
   mode: "pull_request" | "release";
   pr_base_sha: string;
+  release_targets: string[];
   validate_targets: string[];
 };

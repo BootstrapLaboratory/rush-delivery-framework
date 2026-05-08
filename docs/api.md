@@ -15,14 +15,18 @@ command. See [GitHub Action usage](github-actions.md).
 
 `workflow` is the normal release orchestrator. It resolves source, validates
 metadata, computes the CI plan, builds selected deploy targets, packages their
-artifacts, and deploys them in dependency order.
+artifacts, deploys them in dependency order, and can compose selected package
+release targets.
 
 ```sh
 dagger -m "$RUSH_DELIVERY_MODULE" call workflow \
   --git-sha="$GIT_SHA" \
   --event-name=push \
   --dry-run=false \
+  --workflow-env-file="$WORKFLOW_ENV_FILE" \
   --deploy-env-file="$DEPLOY_ENV_FILE" \
+  --release-targets-json='["npm"]' \
+  --release-env-file="$RELEASE_ENV_FILE" \
   --runtime-files="$RUNTIME_FILES_DIR" \
   --source-mode=git \
   --source-repository-url="$SOURCE_REPOSITORY_URL" \
@@ -109,9 +113,20 @@ detection. Forced targets are used by manual deploy wrappers.
 build, and deploy paths. The framework reads it once, then passes only package-
 or deploy-target-allowed variables to build and runtime containers.
 
-`releaseEnvFile` is a newline-delimited environment file for
-`releasePackages`. It carries package release credentials such as `NPM_TOKEN`
-and source write credentials such as `GITHUB_TOKEN`.
+`workflowEnvFile` is a newline-delimited environment file shared by the
+composed `workflow`. Use it for source/provider values that may be needed
+before a stage-specific overlay is selected. `deployEnvFile` and
+`releaseEnvFile` may repeat a workflow env key only with the same value.
+
+`releaseEnvFile` is a newline-delimited environment file for package release.
+It carries package release credentials such as `NPM_TOKEN`. In the composed
+`workflow`, release metadata decides which values reach the package release
+container. In standalone `releasePackages`, the same file also carries source
+write credentials such as `GITHUB_TOKEN`.
+
+`releaseTargetsJson` selects package release targets for `workflow`.
+Currently `["npm"]` is supported. The default `[]` keeps deploy-only workflow
+behavior unchanged.
 
 `runtimeFiles` is an optional directory of deploy-only files such as cloud
 credentials, kubeconfig files, or signing material. Deploy target metadata can

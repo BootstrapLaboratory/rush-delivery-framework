@@ -5,6 +5,7 @@ export type CiPlanSource = {
   deployTargets: string[];
   mode: CiPlan["mode"];
   prBaseSha: string;
+  releaseTargets?: string[];
   validateTargets: string[];
 };
 
@@ -90,6 +91,10 @@ export function normalizeCiPlan(parsedValue: unknown): CiPlan {
     ),
     mode,
     pr_base_sha: prBaseSha,
+    release_targets: parseStringArray(
+      "release_targets" in parsedValue ? parsedValue.release_targets : [],
+      "release_targets",
+    ),
     validate_targets: parseStringArray(
       "validate_targets" in parsedValue
         ? parsedValue.validate_targets
@@ -105,6 +110,7 @@ export function createCiPlan(source: CiPlanSource): CiPlan {
     deploy_targets: source.deployTargets,
     mode: source.mode,
     pr_base_sha: source.prBaseSha,
+    release_targets: source.releaseTargets ?? [],
     validate_targets: source.validateTargets,
   });
 }

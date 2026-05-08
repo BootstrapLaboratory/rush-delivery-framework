@@ -10,7 +10,8 @@ RUSH_DELIVERY_MODULE=github.com/OWNER/rush-delivery@VERSION
 ## `workflow`
 
 The main release composition. It resolves source, validates metadata, detects
-targets, builds, packages, and deploys selected targets.
+deploy targets, selects explicit package release targets, builds, packages, and
+then runs deploy and package-release side effects.
 
 Use it for normal CI release runs and local release dry-runs.
 
@@ -19,7 +20,10 @@ dagger -m "$RUSH_DELIVERY_MODULE" call workflow \
   --git-sha="$GIT_SHA" \
   --event-name=push \
   --dry-run=false \
+  --workflow-env-file="$WORKFLOW_ENV_FILE" \
   --deploy-env-file="$DEPLOY_ENV_FILE" \
+  --release-targets-json='["npm"]' \
+  --release-env-file="$RELEASE_ENV_FILE" \
   --runtime-files="$RUNTIME_FILES_DIR" \
   --source-mode=git \
   --source-repository-url="$SOURCE_REPOSITORY_URL" \
@@ -27,7 +31,12 @@ dagger -m "$RUSH_DELIVERY_MODULE" call workflow \
   --source-auth-token-env=GITHUB_TOKEN
 ```
 
-Returns a text deployment summary.
+When `release-targets-json` is empty, returns the existing text deployment
+summary. When package release targets are selected, returns a combined summary
+with `deploy` and `release_packages` sections.
+
+Deploy and package release side effects run after shared prerequisites. They
+can run concurrently and are not transactional across external systems.
 
 For local runs against a checked-out working tree, use `--repo=.` with
 `--source-mode=local_copy`.
@@ -64,12 +73,12 @@ For local runs against a checked-out working tree, use `--repo=.` with
 Runs package release/versioning from `.dagger/release/npm.yaml`. The initial
 strategy is npm publishing through Rush change files.
 
-Use it for standalone package release workflows. The entrypoint runs the
-shared Rush lifecycle in build-first order (`build`, `lint`, `test`, `verify`),
-lets Rush apply change files, publishes packages, and pushes the generated
-version commit. For live releases, Rush Delivery prepares the metadata target
-branch locally before `rush publish` so Rush can check it out for the final
-merge. It does not touch deploy tags.
+Use it for standalone package release workflows, package-only repositories, and
+release debugging. The entrypoint runs the shared Rush lifecycle in build-first
+order (`build`, `lint`, `test`, `verify`), lets Rush apply change files,
+publishes packages, and pushes the generated version commit. For live releases,
+Rush Delivery prepares the metadata target branch locally before `rush publish`
+so Rush can check it out for the final merge. It does not touch deploy tags.
 
 NPM provenance defaults to `false`; opt in from `.dagger/release/npm.yaml` only
 when the release runtime is wired for supported npm provenance detection.

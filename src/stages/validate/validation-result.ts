@@ -73,6 +73,7 @@ export function createManualValidationCiPlan(
     deploy_targets: [],
     mode: resolveValidationMode(eventName),
     pr_base_sha: prBaseSha,
+    release_targets: [],
     validate_targets: validateTargets,
   };
 }

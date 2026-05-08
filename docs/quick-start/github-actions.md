@@ -33,7 +33,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.7
+      - uses: BootstrapLaboratory/rush-delivery@v0.7.0
         with:
           entrypoint: validate
           toolchain-image-provider: github
@@ -69,7 +69,7 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - name: Rush Delivery
-        uses: BootstrapLaboratory/rush-delivery@v0.6.7
+        uses: BootstrapLaboratory/rush-delivery@v0.7.0
         with:
           dry-run: "false"
           force-targets-json: ${{ inputs.force_targets_json || '[]' }}
@@ -80,12 +80,12 @@ jobs:
           toolchain-image-policy: lazy
           rush-cache-provider: github
           rush-cache-policy: lazy
+          release-targets-json: '["npm"]'
+          release-env: |
+            NPM_TOKEN=${{ secrets.NPM_TOKEN }}
           deploy-env: |
             GCP_PROJECT_ID=${{ vars.GCP_PROJECT_ID }}
             GCP_ARTIFACT_REGISTRY_REPOSITORY=${{ vars.GCP_ARTIFACT_REGISTRY_REPOSITORY }}
-            GITHUB_ACTOR=${{ github.actor }}
-            GITHUB_REPOSITORY=${{ github.repository }}
-            GITHUB_TOKEN=${{ github.token }}
           runtime-file-map: |
             ${{ steps.auth.outputs.credentials_file_path }}=>gcp-credentials.json
 ```
@@ -95,8 +95,14 @@ directly from a custom CI script.
 
 ## Package Release
 
-Use `entrypoint: release-packages` for npm package release/versioning. Keep npm
-credentials in `release-env`; deploy credentials stay in `deploy-env`.
+Use `release-targets-json: '["npm"]'` in the main workflow when package release
+should share the same source acquisition, Rush install cache, and build
+lifecycle as deploy. Deploy tags stay on the original source SHA; Rush package
+release pushes its generated version commit to the configured target branch.
+
+Use `entrypoint: release-packages` when npm package release/versioning should
+stay standalone. Keep npm credentials in `release-env`; deploy credentials stay
+in `deploy-env`.
 
 NPM provenance is disabled by default; opt in from `.dagger/release/npm.yaml`
 only when the Dagger release runtime is configured for supported npm provenance.
@@ -115,7 +121,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.6.7
+      - uses: BootstrapLaboratory/rush-delivery@v0.7.0
         with:
           entrypoint: release-packages
           dry-run: "false"

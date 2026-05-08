@@ -75,9 +75,10 @@ A CI provider should provide:
 
 - Dagger CLI availability.
 - Source coordinates for Git source mode.
-- A deploy environment file with provider credentials and project settings.
-- A release environment file with npm and Git write credentials when running
-  `release-packages`.
+- A workflow environment file with shared source/provider values.
+- A deploy environment file with deploy credentials and project settings.
+- A release environment file with npm credentials when running package release
+  through `workflow` or `release-packages`.
 - A runtime files directory for deploy-only credential or config files when
   targets need file mounts.
 - Optional Docker socket for targets that build container images.
@@ -90,9 +91,10 @@ policies are `pull-or-build`. Trusted release workflows that use `lazy` need
 The CI provider should not compute deploy plans, package artifacts, update
 deploy tags, apply package versions, publish npm packages directly, or encode
 target-specific behavior. Rush Delivery calls Rush for versioning and package
-publishing when the `release-packages` entrypoint is selected.
+publishing when the `npm` release target is selected or when the standalone
+`release-packages` entrypoint is called.
 
 The GitHub Action wrapper in this repository is the first CI adapter. It
-prepares GitHub-specific defaults and then calls the same Dagger `workflow` or
-`validate` entrypoints as raw CLI usage. It also supports `release-packages`
-with `release-env` / `release-env-file` inputs.
+prepares GitHub-specific defaults and then calls the same Dagger `workflow`,
+`validate`, or `release-packages` entrypoints as raw CLI usage. For `workflow`,
+it supports `workflow-env`, `deploy-env`, and `release-env` inputs.

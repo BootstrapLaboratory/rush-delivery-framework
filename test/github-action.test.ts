@@ -65,8 +65,11 @@ test("action metadata defines a composite action over dagger-for-github", () => 
 
   assert.equal(metadata.inputs.entrypoint.default, "workflow");
   assert.equal(metadata.inputs.repo.default, "");
+  assert.equal(metadata.inputs["workflow-env"].default, "");
+  assert.equal(metadata.inputs["workflow-env-file"].default, "");
   assert.equal(metadata.inputs["release-env"].default, "");
   assert.equal(metadata.inputs["release-env-file"].default, "");
+  assert.equal(metadata.inputs["release-targets-json"].default, "[]");
   assert.equal(metadata.inputs["validate-targets-json"].default, "[]");
   assert.equal(metadata.runs.using, "composite");
   assert.ok(
@@ -133,6 +136,8 @@ test("prepare workflow writes deploy env, runtime files, and Dagger args", async
     /--git-sha=1234567890abcdef1234567890abcdef12345678/,
   );
   assert.match(outputs.args, /--dry-run=false/);
+  assert.match(outputs.args, /--release-targets-json=/);
+  assert.match(outputs.args, /--workflow-env-file=/);
   assert.match(outputs.args, /--source-mode=git/);
   assert.match(
     outputs.args,
@@ -144,13 +149,15 @@ test("prepare workflow writes deploy env, runtime files, and Dagger args", async
   const deployEnv = await readFile(outputs["deploy-env-file"], "utf8");
   assert.match(deployEnv, /BASE_VALUE=from-file/);
   assert.match(deployEnv, /GCP_PROJECT_ID=test-project/);
-  assert.match(deployEnv, /GITHUB_ACTOR=octocat/);
-  assert.match(deployEnv, /GITHUB_REPOSITORY=owner\/repo/);
-  assert.match(deployEnv, /GITHUB_API_URL=https:\/\/api\.github\.example/);
-  assert.match(deployEnv, /GITHUB_TOKEN=token-value/);
+
+  const workflowEnv = await readFile(outputs["workflow-env-file"], "utf8");
+  assert.match(workflowEnv, /GITHUB_ACTOR=octocat/);
+  assert.match(workflowEnv, /GITHUB_REPOSITORY=owner\/repo/);
+  assert.match(workflowEnv, /GITHUB_API_URL=https:\/\/api\.github\.example/);
+  assert.match(workflowEnv, /GITHUB_TOKEN=token-value/);
 
   const releaseEnv = await readFile(outputs["release-env-file"], "utf8");
-  assert.match(releaseEnv, /GITHUB_TOKEN=token-value/);
+  assert.equal(releaseEnv, "");
 
   assert.equal(
     await readFile(
@@ -163,6 +170,49 @@ test("prepare workflow writes deploy env, runtime files, and Dagger args", async
   await assert.rejects(
     stat(path.join(outputs["runtime-files"], "ignored.json")),
   );
+
+  await rm(tempDir, { force: true, recursive: true });
+});
+
+test("prepare workflow passes release targets and release env for composed workflow", async () => {
+  const tempDir = mkdtempSync(path.join(tmpdir(), "rush-delivery-action-"));
+  const outputPath = path.join(tempDir, "github-output");
+
+  const result = runPrepare({
+    GITHUB_ACTION_PATH: repoRoot,
+    GITHUB_OUTPUT: outputPath,
+    GITHUB_REF: "refs/heads/main",
+    GITHUB_REPOSITORY: "owner/repo",
+    GITHUB_SERVER_URL: "https://github.example",
+    GITHUB_SHA: "1234567890abcdef1234567890abcdef12345678",
+    INPUT_DRY_RUN: "false",
+    INPUT_INCLUDE_GITHUB_ENV: "true",
+    INPUT_RELEASE_ENV: "NPM_TOKEN=npm-token",
+    INPUT_RELEASE_TARGETS_JSON: '["npm"]',
+    INPUT_SOURCE_AUTH_TOKEN_ENV: "GITHUB_TOKEN",
+    INPUT_SOURCE_MODE: "git",
+    INPUT_WORKFLOW_ENV: "SHARED_VALUE=yes",
+    RD_GITHUB_API_URL: "https://api.github.example",
+    RD_GITHUB_TOKEN: "token-value",
+    RUNNER_TEMP: tempDir,
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+
+  const outputs = parseGithubOutput(await readFile(outputPath, "utf8"));
+  assert.match(outputs.args, /^workflow /);
+  assert.match(outputs.args, /--release-targets-json=/);
+  assert.match(outputs.args, /npm/);
+  assert.match(outputs.args, /--workflow-env-file=/);
+  assert.match(outputs.args, /--release-env-file=/);
+
+  const workflowEnv = await readFile(outputs["workflow-env-file"], "utf8");
+  assert.match(workflowEnv, /SHARED_VALUE=yes/);
+  assert.match(workflowEnv, /GITHUB_TOKEN=token-value/);
+
+  const releaseEnv = await readFile(outputs["release-env-file"], "utf8");
+  assert.match(releaseEnv, /NPM_TOKEN=npm-token/);
+  assert.doesNotMatch(releaseEnv, /GITHUB_TOKEN=token-value/);
 
   await rm(tempDir, { force: true, recursive: true });
 });

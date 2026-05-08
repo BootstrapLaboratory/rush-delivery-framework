@@ -8,7 +8,7 @@ runtime and lets Rush decide which packages should publish.
 This chapter uses
 [BootstrapLaboratory/labkit](https://github.com/BootstrapLaboratory/labkit) as
 the reference shape. LabKit is a package-only Rush monorepo that publishes
-public npm packages through Rush Delivery `v0.6.7`.
+public npm packages through Rush Delivery `v0.7.0`.
 
 ## Rush Projects
 

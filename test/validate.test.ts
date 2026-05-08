@@ -15,6 +15,7 @@ const ciPlan = {
   deploy_targets: [],
   mode: "pull_request",
   pr_base_sha: "base-sha",
+  release_targets: [],
   validate_targets: ["api-contract", "server"],
 } satisfies CiPlan;
 
@@ -48,6 +49,7 @@ test("creates a manual validation plan from override targets", () => {
       deploy_targets: [],
       mode: "release",
       pr_base_sha: "",
+      release_targets: [],
       validate_targets: ["server"],
     },
   );

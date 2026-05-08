@@ -22,13 +22,13 @@ import {
 import { resolveSource } from "../../source/resolve-source.ts";
 import { buildSourceAcquisitionPlan } from "../../source/source-options.ts";
 import { logSection } from "../../logging/sections.ts";
-import { parseDeployEnvFile } from "../deploy/runtime-env.ts";
 import {
   RELEASE_GIT_REPOSITORY_URL_ENV,
   RELEASE_GIT_TARGET_BRANCH_ENV,
   RELEASE_GIT_TOKEN_ENV,
   RELEASE_GIT_USERNAME_ENV,
 } from "./git-auth-env.ts";
+import { parseEnvFileContents } from "../../env/env-file.ts";
 import { loadOptionalNpmReleaseMetadata } from "./load-release-metadata.ts";
 import { buildNpmReleaseExecutionPlan } from "./release-command-plan.ts";
 
@@ -324,6 +324,24 @@ function releaseSummary(
   };
 }
 
+export async function executeNpmPackageRelease(
+  container: Container,
+  definition: NpmReleaseDefinition,
+  sourcePlan: SourcePlan,
+  hostEnv: Record<string, string>,
+  dryRun: boolean,
+): Promise<string> {
+  await runNpmRelease(
+    container,
+    definition,
+    sourcePlan,
+    hostEnv,
+    dryRun,
+  ).sync();
+
+  return JSON.stringify(releaseSummary(definition, dryRun), null, 2);
+}
+
 export async function releasePackages(
   input: ReleasePackagesInput,
 ): Promise<string> {
@@ -343,7 +361,7 @@ export async function releasePackages(
     toolchainImageProvider = "off",
   } = input;
   const hostEnv = releaseEnvFile
-    ? parseDeployEnvFile(await releaseEnvFile.contents())
+    ? parseEnvFileContents(await releaseEnvFile.contents(), "release env")
     : {};
   const sourcePlan = buildSourceAcquisitionPlan({
     gitSha,
@@ -404,13 +422,11 @@ export async function releasePackages(
   );
   const builtContainer = runRushLifecycle(rushContainer);
 
-  await runNpmRelease(
+  return executeNpmPackageRelease(
     builtContainer,
     definition,
     sourcePlan,
     hostEnv,
     dryRun,
-  ).sync();
-
-  return JSON.stringify(releaseSummary(definition, dryRun), null, 2);
+  );
 }

@@ -131,20 +131,33 @@ mkdir -p "${action_temp}"
 module="${INPUT_MODULE:-${GITHUB_ACTION_PATH}}"
 entrypoint="${INPUT_ENTRYPOINT:-workflow}"
 repo_input="${INPUT_REPO-}"
+workflow_env_file="${action_temp}/dagger-workflow.env"
 deploy_env_file="${action_temp}/dagger-deploy.env"
 release_env_file="${action_temp}/dagger-release.env"
 runtime_files="${INPUT_RUNTIME_FILES:-${action_temp}/runtime-files}"
 
+: >"${workflow_env_file}"
 : >"${deploy_env_file}"
 : >"${release_env_file}"
 
+append_env_content "${workflow_env_file}" "${INPUT_WORKFLOW_ENV_FILE-}" "${INPUT_WORKFLOW_ENV-}" "workflow-env"
 append_env_content "${deploy_env_file}" "${INPUT_DEPLOY_ENV_FILE-}" "${INPUT_DEPLOY_ENV-}" "deploy-env"
 append_env_content "${release_env_file}" "${INPUT_RELEASE_ENV_FILE-}" "${INPUT_RELEASE_ENV-}" "release-env"
 
 case "${INPUT_INCLUDE_GITHUB_ENV:-true}" in
 true | TRUE | True | 1 | yes | YES | Yes | on | ON | On)
-	append_github_env "${deploy_env_file}"
-	append_github_env "${release_env_file}"
+	case "${entrypoint}" in
+	workflow)
+		append_github_env "${workflow_env_file}"
+		;;
+	validate)
+		append_github_env "${deploy_env_file}"
+		;;
+	releasePackages | release-packages)
+		append_github_env "${release_env_file}"
+		;;
+	*) ;;
+	esac
 	;;
 *) ;;
 esac
@@ -176,6 +189,7 @@ git_sha="${INPUT_GIT_SHA:-${GITHUB_SHA-}}"
 
 event_name="${INPUT_EVENT_NAME:-${GITHUB_EVENT_NAME:-push}}"
 force_targets_json="${INPUT_FORCE_TARGETS_JSON:-[]}"
+release_targets_json="${INPUT_RELEASE_TARGETS_JSON:-[]}"
 validate_targets_json="${INPUT_VALIDATE_TARGETS_JSON:-[]}"
 pr_base_sha="${INPUT_PR_BASE_SHA:-${RD_PR_BASE_SHA-}}"
 deploy_tag_prefix="${INPUT_DEPLOY_TAG_PREFIX:-deploy/prod}"
@@ -249,11 +263,13 @@ workflow)
 		"--git-sha=${git_sha}"
 		"--event-name=${event_name}"
 		"--force-targets-json=${force_targets_json}"
+		"--release-targets-json=${release_targets_json}"
 		"--pr-base-sha=${pr_base_sha}"
 		"--deploy-tag-prefix=${deploy_tag_prefix}"
 		"--artifact-prefix=${artifact_prefix}"
 		"--environment=${environment}"
 		"--dry-run=${dry_run}"
+		"--workflow-env-file=${workflow_env_file}"
 		"--deploy-env-file=${deploy_env_file}"
 		"--toolchain-image-provider=${toolchain_image_provider}"
 		"--toolchain-image-policy=${toolchain_image_policy}"
@@ -261,6 +277,9 @@ workflow)
 		"--rush-cache-policy=${rush_cache_policy}"
 		"--runtime-files=${runtime_files}"
 	)
+	if [[ ${release_targets_json} != "[]" || -s ${release_env_file} ]]; then
+		args+=("--release-env-file=${release_env_file}")
+	fi
 	append_source_args
 
 	if [[ -n ${host_workspace_dir} ]]; then
@@ -311,6 +330,7 @@ fi
 
 write_output module "${module}"
 write_output args "${call_args}"
+write_output workflow-env-file "${workflow_env_file}"
 write_output deploy-env-file "${deploy_env_file}"
 write_output release-env-file "${release_env_file}"
 write_output runtime-files "${runtime_files}"
