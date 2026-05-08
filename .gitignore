@@ -1,6 +1,7 @@
 /sdk
-/**/node_modules/
 /.env
+/**/node_modules
+/**/.pnpm-store/**
 /website/.astro/
 /website/dist/
 /website/public/schemas/
@@ -12,5 +13,3 @@
 /website-docusaurus/versioned_docs/
 /website-docusaurus/versioned_sidebars/
 /website-docusaurus/versions.json
-/**/node_modules/**
-/**/.pnpm-store/**
