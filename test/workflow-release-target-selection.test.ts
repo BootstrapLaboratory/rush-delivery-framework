@@ -19,4 +19,3 @@ test("rejects unknown workflow release targets", () => {
     /Unsupported workflow release target "npm"\. Configured release targets: \(none\)\./,
   );
 });
-

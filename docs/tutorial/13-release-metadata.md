@@ -32,7 +32,7 @@ metadata in two places:
 
 - PR validation runs `rush change --verify --target-branch <target_branch>`.
 - Live package release runs `rush publish --apply --target-branch
-  <target_branch> --publish`.
+<target_branch> --publish`.
 
 For live Git source releases, Rush Delivery fetches and prepares
 `target_branch` locally before invoking `rush publish`. Rush can then check out

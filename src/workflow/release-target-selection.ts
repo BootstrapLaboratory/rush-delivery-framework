@@ -17,4 +17,3 @@ export function selectWorkflowReleaseTargets(
 
   return selectedTargets;
 }
-

@@ -39,7 +39,7 @@ For GitHub Actions, prefer the repository action wrapper:
 
 ```yaml
 - name: Rush Delivery
-  uses: BootstrapLaboratory/rush-delivery@v0.7.0
+  uses: BootstrapLaboratory/rush-delivery@v0.7.1
   with:
     force-targets-json: ${{ inputs.force_targets_json || '[]' }}
     environment: prod
@@ -62,7 +62,7 @@ change files:
 
 ```yaml
 - name: Rush Delivery validation
-  uses: BootstrapLaboratory/rush-delivery@v0.7.0
+  uses: BootstrapLaboratory/rush-delivery@v0.7.1
   with:
     entrypoint: validate
     toolchain-image-provider: github
@@ -81,7 +81,7 @@ adapters off:
 
 ```yaml
 - name: Rush Delivery package release
-  uses: BootstrapLaboratory/rush-delivery@v0.7.0
+  uses: BootstrapLaboratory/rush-delivery@v0.7.1
   with:
     entrypoint: release-packages
     dry-run: "false"

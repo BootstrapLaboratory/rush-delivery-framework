@@ -229,11 +229,7 @@ schemas according to the versioned docs/schema convention.
 - [x] Add or extend workflow planning types to include `release_targets`.
 - [x] Add release target selection validation against release metadata.
 - [x] Keep unsupported release targets failing clearly.
-- [x] Add tests for release target selection:
-      - no selected targets by default;
-      - `["npm"]` selected when metadata exists;
-      - unknown target rejected;
-      - duplicate release targets normalized.
+- [x] Add tests for release target selection: - no selected targets by default; - `["npm"]` selected when metadata exists; - unknown target rejected; - duplicate release targets normalized.
 
 ### Phase 2: Env Boundaries
 
@@ -273,14 +269,8 @@ schemas according to the versioned docs/schema convention.
 
 ### Phase 5: Public API And GitHub Action
 
-- [x] Add `workflow` Dagger args:
-      - `releaseTargetsJson`
-      - `workflowEnvFile`
-      - `releaseEnvFile`
-- [x] Add GitHub Action inputs:
-      - `release-targets-json`
-      - `workflow-env`
-      - `workflow-env-file`
+- [x] Add `workflow` Dagger args: - `releaseTargetsJson` - `workflowEnvFile` - `releaseEnvFile`
+- [x] Add GitHub Action inputs: - `release-targets-json` - `workflow-env` - `workflow-env-file`
 - [x] Make action `workflow` pass workflow/release env files when needed.
 - [x] Keep standalone `entrypoint: release-packages` behavior unchanged.
 - [x] Add action tests for combined workflow argument generation.
@@ -294,11 +284,7 @@ schemas according to the versioned docs/schema convention.
       and tutorial package-release chapters.
 - [x] Replace guidance that package release must be a separate workflow with
       guidance that it can be standalone or composed into `workflow`.
-- [x] Document production recommendations:
-      - explicit `release-targets-json`;
-      - `release-env` separate from `deploy-env`;
-      - deploy tags stay on original source SHA;
-      - side effects are concurrent but not transactional.
+- [x] Document production recommendations: - explicit `release-targets-json`; - `release-env` separate from `deploy-env`; - deploy tags stay on original source SHA; - side effects are concurrent but not transactional.
 
 ### Phase 7: Verification
 

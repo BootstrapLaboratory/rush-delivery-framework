@@ -534,15 +534,10 @@ export async function validateMetadataContractRepository(
   options: MetadataContractValidationOptions = {},
 ): Promise<MetadataContractValidationResult> {
   const requireDeployMetadata = options.require_deploy_metadata ?? true;
-  const requireRushCacheMetadata =
-    options.require_rush_cache_metadata ?? true;
+  const requireRushCacheMetadata = options.require_rush_cache_metadata ?? true;
   const issues: string[] = [];
   const rushProjects = await loadRushProjects(repository, issues);
-  await validateRushCacheMetadata(
-    repository,
-    issues,
-    requireRushCacheMetadata,
-  );
+  await validateRushCacheMetadata(repository, issues, requireRushCacheMetadata);
   const releaseTargets = await validateReleaseMetadata(repository, issues);
 
   if (!requireDeployMetadata) {

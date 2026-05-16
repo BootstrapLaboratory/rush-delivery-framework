@@ -30,4 +30,3 @@ export function parseEnvFileContents(
 
   return envVars;
 }
-

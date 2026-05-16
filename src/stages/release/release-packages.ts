@@ -155,7 +155,10 @@ function withNpmPublishEnvironment(
   return container.withEnvVariable("NPM_CONFIG_PROVENANCE", "true");
 }
 
-function withGitAuthorIdentity(container: Container, dryRun: boolean): Container {
+function withGitAuthorIdentity(
+  container: Container,
+  dryRun: boolean,
+): Container {
   if (dryRun) {
     return container;
   }

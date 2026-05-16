@@ -67,24 +67,8 @@ task.
 ### Phase 1: Documentation Inventory
 
 - [x] Review the current public docs pages for stale or thin release-package
-      coverage:
-      - `README.md`
-      - `docs/README.md`
-      - `docs/api.md`
-      - `docs/entrypoints.md`
-      - `docs/github-actions.md`
-      - `docs/metadata.md`
-      - `docs/workflows.md`
-      - `docs/quick-start/github-actions.md`
-      - `docs/quick-start/ci-cli.md`
-      - `docs/quick-start/local-run.md`
-      - `docs/tutorial/README.md`
-      - `docs/tutorial/09-github-actions.md`
-      - `docs/tutorial/10-local-dry-runs.md`
-      - `docs/tutorial/11-adapting-to-your-project.md`
-- [x] Review website docs trees before adding tutorial pages:
-      - `website-docusaurus/docs-tree.yaml`
-      - `website/docs-tree.yaml`
+      coverage: - `README.md` - `docs/README.md` - `docs/api.md` - `docs/entrypoints.md` - `docs/github-actions.md` - `docs/metadata.md` - `docs/workflows.md` - `docs/quick-start/github-actions.md` - `docs/quick-start/ci-cli.md` - `docs/quick-start/local-run.md` - `docs/tutorial/README.md` - `docs/tutorial/09-github-actions.md` - `docs/tutorial/10-local-dry-runs.md` - `docs/tutorial/11-adapting-to-your-project.md`
+- [x] Review website docs trees before adding tutorial pages: - `website-docusaurus/docs-tree.yaml` - `website/docs-tree.yaml`
 - [x] Keep archived docs under `docs-versions/` unchanged.
 
 ### Phase 2: Docs And Quick Start
@@ -93,13 +77,7 @@ task.
       complete enough for repository visitors.
 - [x] Update the docs introduction so package release is a first-class guide
       topic, not only an API mention.
-- [x] Expand GitHub Action docs with:
-      - a minimal package-only workflow based on LabKit;
-      - release env vs deploy env;
-      - required permissions;
-      - provider-off vs provider-backed cache/toolchain choices;
-      - `NPM_TOKEN` and `GITHUB_TOKEN` behavior;
-      - provenance default and when not to enable it.
+- [x] Expand GitHub Action docs with: - a minimal package-only workflow based on LabKit; - release env vs deploy env; - required permissions; - provider-off vs provider-backed cache/toolchain choices; - `NPM_TOKEN` and `GITHUB_TOKEN` behavior; - provenance default and when not to enable it.
 - [x] Expand raw Dagger CLI docs with a complete `release-packages` command and
       a small `dagger-release.env` example.
 - [x] Expand local run docs with a local `release-packages` dry-run shape and
@@ -109,51 +87,18 @@ task.
 
 ### Phase 3: Metadata Reference
 
-- [x] Expand `.dagger/release/npm.yaml` documentation with every current field:
-      - `kind`
-      - `versioning.strategy`
-      - `versioning.target_branch`
-      - `auth.kind`
-      - `auth.token_env`
-      - `publish.registry`
-      - `publish.tag`
-      - `publish.access`
-      - `publish.provenance`
-- [x] Explain how Rush remains the source of truth for:
-      - package selection;
-      - package versions;
-      - change files;
-      - version policies;
-      - changelogs;
-      - publishable package rules.
-- [x] Add LabKit-inspired examples for:
-      - `.dagger/release/npm.yaml`;
-      - `common/config/rush/.npmrc-publish`;
-      - `common/config/rush/version-policies.json`;
-      - `rush.json` `versionPolicyName`;
-      - package-level `publishConfig` and `files`.
+- [x] Expand `.dagger/release/npm.yaml` documentation with every current field: - `kind` - `versioning.strategy` - `versioning.target_branch` - `auth.kind` - `auth.token_env` - `publish.registry` - `publish.tag` - `publish.access` - `publish.provenance`
+- [x] Explain how Rush remains the source of truth for: - package selection; - package versions; - change files; - version policies; - changelogs; - publishable package rules.
+- [x] Add LabKit-inspired examples for: - `.dagger/release/npm.yaml`; - `common/config/rush/.npmrc-publish`; - `common/config/rush/version-policies.json`; - `rush.json` `versionPolicyName`; - package-level `publishConfig` and `files`.
 - [x] Mention private tooling packages and package publishability without
       overfitting to LabKit internals.
 
 ### Phase 4: Tutorial
 
-- [x] Update tutorial introduction to mention two real examples:
-      - the existing deployment app tutorial repository;
-      - LabKit as the npm package release reference repository.
+- [x] Update tutorial introduction to mention two real examples: - the existing deployment app tutorial repository; - LabKit as the npm package release reference repository.
 - [x] Add release-package tutorial chapters after the current deployment
-      chapters. Proposed new chapters:
-      - `12-npm-package-release-baseline.md`
-      - `13-release-metadata.md`
-      - `14-package-release-workflow.md`
-- [x] Teach the package release setup in tutorial order:
-      - Rush package publish shape;
-      - Rush version policies;
-      - change-file workflow;
-      - `.npmrc-publish`;
-      - `.dagger/release/npm.yaml`;
-      - GitHub Action `release-packages`;
-      - PR release-readiness validation;
-      - local dry-run.
+      chapters. Proposed new chapters: - `12-npm-package-release-baseline.md` - `13-release-metadata.md` - `14-package-release-workflow.md`
+- [x] Teach the package release setup in tutorial order: - Rush package publish shape; - Rush version policies; - change-file workflow; - `.npmrc-publish`; - `.dagger/release/npm.yaml`; - GitHub Action `release-packages`; - PR release-readiness validation; - local dry-run.
 - [x] Update tutorial next/previous links and chapter index.
 - [x] Update both website docs trees so Docusaurus and Astro expose the new
       tutorial chapters.

@@ -22,12 +22,12 @@ const examples = [
     languageLabel: "yaml",
     highlightLanguage: "yaml",
     code: [
-      "uses: BootstrapLaboratory/rush-delivery@v0.7.0",
+      "uses: BootstrapLaboratory/rush-delivery@v0.7.1",
       "with:",
       '  dry-run: "false"',
       "  toolchain-image-provider: github",
       "  rush-cache-provider: github",
-      '  release-targets-json: \'["npm"]\'',
+      "  release-targets-json: '[\"npm\"]'",
       "  runtime-file-map: |",
       "    ${{ steps.auth.outputs.credentials_file_path }}=>gcp-credentials.json",
       "  deploy-env: |",
@@ -43,7 +43,7 @@ const examples = [
     languageLabel: "sh",
     highlightLanguage: "bash",
     code: [
-      "dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.7.0 call workflow \\",
+      "dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.7.1 call workflow \\",
       '  --git-sha="${GITHUB_SHA}" \\',
       '  --event-name="${GITHUB_EVENT_NAME}" \\',
       "  --release-targets-json='[\"npm\"]' \\",
@@ -62,7 +62,7 @@ const examples = [
     languageLabel: "yaml",
     highlightLanguage: "yaml",
     code: [
-      "uses: BootstrapLaboratory/rush-delivery@v0.7.0",
+      "uses: BootstrapLaboratory/rush-delivery@v0.7.1",
       "with:",
       "  entrypoint: validate",
       "  toolchain-image-provider: github",

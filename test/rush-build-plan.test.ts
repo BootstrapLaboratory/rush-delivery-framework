@@ -179,12 +179,7 @@ test("keeps validation planning separate from deploy targets", () => {
     }),
     [
       {
-        args: [
-          "common/scripts/install-run-rush.js",
-          "build",
-          "--to",
-          "server",
-        ],
+        args: ["common/scripts/install-run-rush.js", "build", "--to", "server"],
         command: "node",
       },
       {

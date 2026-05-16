@@ -47,7 +47,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.7.0
+      - uses: BootstrapLaboratory/rush-delivery@v0.7.1
         with:
           entrypoint: validate
           toolchain-image-provider: github
@@ -76,7 +76,7 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - name: Rush Delivery
-        uses: BootstrapLaboratory/rush-delivery@v0.7.0
+        uses: BootstrapLaboratory/rush-delivery@v0.7.1
         with:
           dry-run: "false"
           environment: prod
@@ -106,7 +106,7 @@ source SHA; Rush package release pushes its generated version commit to the
 metadata `target_branch`.
 
 ```yaml
-- uses: BootstrapLaboratory/rush-delivery@v0.7.0
+- uses: BootstrapLaboratory/rush-delivery@v0.7.1
   with:
     dry-run: "false"
     release-targets-json: '["npm"]'
@@ -146,7 +146,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: BootstrapLaboratory/rush-delivery@v0.7.0
+      - uses: BootstrapLaboratory/rush-delivery@v0.7.1
         with:
           entrypoint: release-packages
           dry-run: "false"
@@ -168,7 +168,7 @@ This mode clones the target repository inside Dagger, so the CI runner does not
 need to mount the repository into the module.
 
 ```sh
-RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.7.0
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.7.1
 RUNTIME_FILES_DIR="${RUNNER_TEMP}/rush-delivery-runtime-files"
 WORKFLOW_ENV_FILE="${RUNNER_TEMP}/dagger-workflow.env"
 DEPLOY_ENV_FILE="${RUNNER_TEMP}/dagger-deploy.env"
@@ -223,7 +223,7 @@ available to Dagger and avoids relying on a remote Git ref that does not contain
 your latest changes.
 
 ```sh
-RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.7.0
+RUSH_DELIVERY_MODULE=github.com/BootstrapLaboratory/rush-delivery@v0.7.1
 
 dagger -m "${RUSH_DELIVERY_MODULE}" call workflow \
   --repo=. \

@@ -64,10 +64,12 @@ async function settleWorkflowSideEffects(
   }>,
 ): Promise<Record<string, string>> {
   const settled = await Promise.allSettled(
-    tasks.map(async (task): Promise<WorkflowSideEffectResult> => ({
-      name: task.name,
-      value: await task.promise,
-    })),
+    tasks.map(
+      async (task): Promise<WorkflowSideEffectResult> => ({
+        name: task.name,
+        value: await task.promise,
+      }),
+    ),
   );
   const failures: string[] = [];
   const results: Record<string, string> = {};

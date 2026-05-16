@@ -14,7 +14,7 @@ const examples = [
     languageLabel: "yaml",
     highlightLanguage: "yaml",
     code: [
-      "uses: BootstrapLaboratory/rush-delivery@v0.7.0",
+      "uses: BootstrapLaboratory/rush-delivery@v0.7.1",
       "with:",
       '  dry-run: "false"',
       "  toolchain-image-provider: github",
@@ -35,7 +35,7 @@ const examples = [
     languageLabel: "sh",
     highlightLanguage: "shellscript",
     code: [
-      "dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.7.0 call workflow \\",
+      "dagger -m github.com/BootstrapLaboratory/rush-delivery@v0.7.1 call workflow \\",
       '  --git-sha="${GITHUB_SHA}" \\',
       '  --event-name="${GITHUB_EVENT_NAME}" \\',
       "  --release-targets-json='[\"npm\"]' \\",
@@ -54,7 +54,7 @@ const examples = [
     languageLabel: "yaml",
     highlightLanguage: "yaml",
     code: [
-      "uses: BootstrapLaboratory/rush-delivery@v0.7.0",
+      "uses: BootstrapLaboratory/rush-delivery@v0.7.1",
       "with:",
       "  entrypoint: validate",
       "  toolchain-image-provider: github",
